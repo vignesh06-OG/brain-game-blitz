@@ -7,7 +7,8 @@
  */
 import { analyse, type Analysis } from "./analysis";
 import { genome, type Genome } from "./genome";
-import { key, type Board, type ColorMask, type Piece } from "./types";
+import { reflect } from "./engine";
+import { DELTA, key, type Board, type Dir, type Piece } from "./types";
 
 export interface Candidate {
   board: Board;
@@ -43,52 +44,121 @@ const piece = (p: Omit<Piece, "id">): Piece => ({ id: `g${(uid++).toString(36)}`
 
 const COLORS: ColorMask[] = [1, 2, 4, 3, 5, 6, 7];
 
+/**
+ * Grows a candidate by construction, not by chance: it walks a beam from an
+ * emitter, bends it at mirrors, ends the run on a target, then scrambles a few
+ * mirrors so the player has real moves to find. Construction guarantees the
+ * layout is reachable; the BFS solver still has the final say.
+ */
 function grow(rand: () => number, width: number, height: number, gen: number): Board {
   const cells: Record<string, Piece> = {};
-  const free: string[] = [];
-  for (let y = 0; y < height; y++) for (let x = 0; x < width; x++) free.push(key(x, y));
+  const used = new Set<string>();
+  const pathCells = new Set<string>();
 
-  const take = (): string => {
-    const i = Math.floor(rand() * free.length);
-    return free.splice(i, 1)[0]!;
+  const pick = <T,>(arr: T[]): T => arr[Math.floor(rand() * arr.length)]!;
+
+  // Start on an edge, firing inward.
+  const side = Math.floor(rand() * 4) as 0 | 1 | 2 | 3;
+  let x: number;
+  let y: number;
+  let dir: Dir;
+  if (side === 0) {
+    x = Math.floor(rand() * width);
+    y = height - 1;
+    dir = 0;
+  } else if (side === 1) {
+    x = 0;
+    y = Math.floor(rand() * height);
+    dir = 1;
+  } else if (side === 2) {
+    x = Math.floor(rand() * width);
+    y = 0;
+    dir = 2;
+  } else {
+    x = width - 1;
+    y = Math.floor(rand() * height);
+    dir = 3;
+  }
+
+  cells[key(x, y)] = piece({ kind: "emitter", rot: dir, color: 7, fixed: true });
+  used.add(key(x, y));
+  pathCells.add(key(x, y));
+
+  const mirrorKeys: string[] = [];
+  const bends = 1 + Math.floor(rand() * Math.min(3, 1 + gen));
+
+  const runTo = (steps: number): boolean => {
+    for (let i = 0; i < steps; i++) {
+      const [dx, dy] = DELTA[dir];
+      const nx = x + dx;
+      const ny = y + dy;
+      if (nx < 0 || ny < 0 || nx >= width || ny >= height) return false;
+      if (used.has(key(nx, ny))) return false;
+      x = nx;
+      y = ny;
+      pathCells.add(key(x, y));
+    }
+    return true;
   };
 
-  const emitters = 1 + (rand() < 0.25 ? 1 : 0);
-  for (let i = 0; i < emitters; i++) {
-    cells[take()] = piece({
-      kind: "emitter",
-      rot: Math.floor(rand() * 4),
-      color: rand() < 0.6 ? 7 : COLORS[Math.floor(rand() * 3)]!,
-      fixed: true,
-    });
+  for (let b = 0; b < bends; b++) {
+    const steps = 1 + Math.floor(rand() * 3);
+    if (!runTo(steps)) break;
+    const rot = rand() < 0.5 ? 0 : 1;
+    const k = key(x, y);
+    cells[k] = piece({ kind: "mirror", rot });
+    used.add(k);
+    mirrorKeys.push(k);
+    dir = reflect(dir, rot);
   }
 
-  const targets = 1 + (rand() < 0.45 ? 1 : 0);
-  for (let i = 0; i < targets; i++) {
-    cells[take()] = piece({
-      kind: "target",
-      rot: 0,
-      color: COLORS[Math.floor(rand() * COLORS.length)]!,
-      fixed: true,
-    });
+  // Final straight run into the target.
+  if (!runTo(1 + Math.floor(rand() * 3))) {
+    const [dx, dy] = DELTA[dir];
+    if (
+      x + dx < 0 ||
+      y + dy < 0 ||
+      x + dx >= width ||
+      y + dy >= height ||
+      used.has(key(x + dx, y + dy))
+    ) {
+      return { width, height, cells, tray: [] }; // dead layout; the solver rejects it
+    }
   }
+  const targetKey = key(x, y);
+  if (used.has(targetKey)) return { width, height, cells, tray: [] };
+  cells[targetKey] = piece({ kind: "target", rot: 0, color: 7, fixed: true });
+  used.add(targetKey);
 
-  const mirrors = 1 + Math.floor(rand() * 3);
-  for (let i = 0; i < mirrors; i++) {
-    cells[take()] = piece({ kind: "mirror", rot: Math.floor(rand() * 2) });
-  }
-  if (rand() < 0.5) cells[take()] = piece({ kind: "splitter", rot: Math.floor(rand() * 2) });
-  if (rand() < 0.35) cells[take()] = piece({ kind: "prism", rot: 0 });
-  if (rand() < 0.3)
-    cells[take()] = piece({ kind: "filter", rot: 0, color: COLORS[Math.floor(rand() * 3)]! });
-  if (rand() < 0.3 + gen * 0.05)
-    cells[take()] = piece({ kind: rand() < 0.5 ? "glass" : "crystal", rot: 0, color: 7 });
-
+  // Decoration: walls only where they cannot touch the solution path.
   const walls = Math.floor(rand() * 3);
-  for (let i = 0; i < walls; i++) cells[take()] = piece({ kind: "wall", rot: 0, fixed: true });
+  for (let i = 0; i < walls; i++) {
+    const wx = Math.floor(rand() * width);
+    const wy = Math.floor(rand() * height);
+    const k = key(wx, wy);
+    if (pathCells.has(k) || used.has(k)) continue;
+    cells[k] = piece({ kind: "wall", rot: 0, fixed: true });
+    used.add(k);
+  }
 
+  // Scramble: flip mirrors and, sometimes, lift one into the tray.
   const tray: Piece[] = [];
-  if (rand() < 0.5) tray.push(piece({ kind: "mirror", rot: 0 }));
+  if (mirrorKeys.length) {
+    const flips = 1 + Math.floor(rand() * mirrorKeys.length);
+    for (let i = 0; i < flips; i++) {
+      const k = pick(mirrorKeys);
+      const p = cells[k]!;
+      cells[k] = { ...p, rot: (p.rot + 1) % 2 };
+    }
+    if (rand() < 0.3) {
+      const k = pick(mirrorKeys);
+      const p = cells[k];
+      if (p) {
+        delete cells[k];
+        tray.push(p);
+      }
+    }
+  }
 
   return { width, height, cells, tray };
 }
