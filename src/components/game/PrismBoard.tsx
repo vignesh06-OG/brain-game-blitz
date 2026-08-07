@@ -59,7 +59,9 @@ function PieceShape({
             r={13}
             fill={color}
             filter="url(#glow)"
-            animate={reduceMotion ? undefined : { opacity: [0.75, 1, 0.75], r: [12, 14, 12] }}
+            animate={
+              reduceMotion ? { opacity: 1 } : { opacity: [0.75, 1, 0.75], r: [12, 14, 12] }
+            }
             transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut" }}
           />
           <g transform={`rotate(${piece.rot * 90})`}>
