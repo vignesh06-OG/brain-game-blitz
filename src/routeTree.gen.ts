@@ -14,6 +14,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
+import { Route as IntelligenceIndexRouteImport } from './routes/intelligence.index'
 import { Route as LabIndexRouteImport } from './routes/lab.index'
 import { Route as PlayIndexRouteImport } from './routes/play.index'
 import { Route as PlayLevelIdRouteImport } from './routes/play.$levelId'
@@ -49,6 +50,11 @@ const Char91DotwellKnownChar93OauthProtectedResourceRoute =
     path: '/.well-known/oauth-protected-resource',
     getParentRoute: () => rootRouteImport,
   } as any)
+const IntelligenceIndexRoute = IntelligenceIndexRouteImport.update({
+  id: '/intelligence/',
+  path: '/intelligence/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LabIndexRoute = LabIndexRouteImport.update({
   id: '/lab/',
   path: '/lab/',
@@ -93,6 +99,7 @@ export interface FileRoutesByFullPath {
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/play/$levelId': typeof PlayLevelIdRoute
+  '/intelligence/': typeof IntelligenceIndexRoute
   '/lab/': typeof LabIndexRoute
   '/play/': typeof PlayIndexRoute
   '/sandbox/': typeof SandboxIndexRoute
@@ -107,6 +114,7 @@ export interface FileRoutesByTo {
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/play/$levelId': typeof PlayLevelIdRoute
+  '/intelligence': typeof IntelligenceIndexRoute
   '/lab': typeof LabIndexRoute
   '/play': typeof PlayIndexRoute
   '/sandbox': typeof SandboxIndexRoute
@@ -122,6 +130,7 @@ export interface FileRoutesById {
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/play/$levelId': typeof PlayLevelIdRoute
+  '/intelligence/': typeof IntelligenceIndexRoute
   '/lab/': typeof LabIndexRoute
   '/play/': typeof PlayIndexRoute
   '/sandbox/': typeof SandboxIndexRoute
@@ -138,6 +147,7 @@ export interface FileRouteTypes {
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/play/$levelId'
+    | '/intelligence/'
     | '/lab/'
     | '/play/'
     | '/sandbox/'
@@ -152,6 +162,7 @@ export interface FileRouteTypes {
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/play/$levelId'
+    | '/intelligence'
     | '/lab'
     | '/play'
     | '/sandbox'
@@ -166,6 +177,7 @@ export interface FileRouteTypes {
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/play/$levelId'
+    | '/intelligence/'
     | '/lab/'
     | '/play/'
     | '/sandbox/'
@@ -181,6 +193,7 @@ export interface RootRouteChildren {
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   PlayLevelIdRoute: typeof PlayLevelIdRoute
+  IntelligenceIndexRoute: typeof IntelligenceIndexRoute
   LabIndexRoute: typeof LabIndexRoute
   PlayIndexRoute: typeof PlayIndexRoute
   SandboxIndexRoute: typeof SandboxIndexRoute
@@ -224,6 +237,13 @@ declare module '@tanstack/react-router' {
       path: '/.well-known/oauth-protected-resource'
       fullPath: '/.well-known/oauth-protected-resource'
       preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/intelligence/': {
+      id: '/intelligence/'
+      path: '/intelligence'
+      fullPath: '/intelligence/'
+      preLoaderRoute: typeof IntelligenceIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/lab/': {
@@ -286,6 +306,7 @@ const rootRouteChildren: RootRouteChildren = {
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
   PlayLevelIdRoute: PlayLevelIdRoute,
+  IntelligenceIndexRoute: IntelligenceIndexRoute,
   LabIndexRoute: LabIndexRoute,
   PlayIndexRoute: PlayIndexRoute,
   SandboxIndexRoute: SandboxIndexRoute,

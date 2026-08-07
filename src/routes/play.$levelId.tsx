@@ -18,6 +18,7 @@ import { AmbientBackdrop } from "@/components/game/AmbientBackdrop";
 import { CinematicSolve } from "@/components/game/CinematicSolve";
 import { CommentaryPanel } from "@/components/game/CommentaryPanel";
 import { PrismBoard } from "@/components/game/PrismBoard";
+import { CoachPanel } from "@/components/photonmind/CoachPanel";
 import { SolveTimeline } from "@/components/game/SolveTimeline";
 import { evaluate, type Achievement } from "@/game/achievements";
 import { setAudioEnabled } from "@/game/audio";
@@ -26,6 +27,9 @@ import { colorGlyph, colorName } from "@/game/engine";
 import { getLevel, nextLevel } from "@/game/levels";
 import { loadPrefs, recordSolve, savePrefs } from "@/game/progress";
 import { useGame } from "@/game/useGame";
+import { usePlayerModel } from "@/game/photonmind/usePlayerModel";
+import { analyse } from "@/game/analysis";
+import type { Board } from "@/game/types";
 import type { Piece } from "@/game/types";
 import { cn } from "@/lib/utils";
 
@@ -98,12 +102,37 @@ function LevelScreen({ levelId }: { levelId: string }) {
   const [unlocked, setUnlocked] = useState<Achievement[]>([]);
   const undosRef = useRef(0);
   const startedAt = useRef(Date.now());
+  const player = usePlayerModel(level.par);
+  const [solutionBoard, setSolutionBoard] = useState<Board | null>(null);
   const next = nextLevel(levelId);
   const rm = prefs.reduceMotion;
 
   useEffect(() => setPrefs(loadPrefs()), []);
 
   useAdaptiveAudio(game.result, game.litKeys.length, audioOn);
+
+  // PhotonMind observes the move stream locally; nothing leaves the device.
+  const lastRecorded = useRef(0);
+  useEffect(() => {
+    if (game.moves === lastRecorded.current || !game.lastTouched) return;
+    lastRecorded.current = game.moves;
+    player.record(game.lastTouched, game.result.solvedCount);
+  }, [game.moves, game.lastTouched, game.result.solvedCount, player]);
+
+  // Solve the level once, off the paint path, so the coach can reason about
+  // which cells actually matter without ever showing the answer.
+  useEffect(() => {
+    let cancelled = false;
+    setSolutionBoard(null);
+    const t = window.setTimeout(() => {
+      const a = analyse(level.board);
+      if (!cancelled) setSolutionBoard(a.solutionBoard);
+    }, 400);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(t);
+    };
+  }, [level]);
 
   // Stop the audio graph when the player leaves the puzzle.
   useEffect(() => () => void setAudioEnabled(false), []);
@@ -147,9 +176,11 @@ function LevelScreen({ levelId }: { levelId: string }) {
     startedAt.current = Date.now();
     setUnlocked([]);
     setHintLevel(0);
+    lastRecorded.current = 0;
+    player.clear();
     setCelebrated(false);
     setNudgeDismissed(false);
-  }, [game]);
+  }, [game, player]);
 
   // Keyboard shortcuts — desktop players never have to reach for the mouse.
   useEffect(() => {
@@ -414,6 +445,28 @@ function LevelScreen({ levelId }: { levelId: string }) {
                         : level.hint}
                     </p>
                   </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <AnimatePresence initial={false}>
+              {(hintLevel > 0 || game.struggling) && !game.result.solved && (
+                <motion.div
+                  key="coach"
+                  initial={rm ? false : { opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: rm ? 0 : 0.3, ease: "easeOut" }}
+                  className="overflow-hidden"
+                >
+                  <CoachPanel
+                    board={game.board}
+                    solution={solutionBoard}
+                    behaviour={player.behaviour}
+                    par={level.par}
+                    moves={game.moves}
+                    reduceMotion={rm}
+                  />
                 </motion.div>
               )}
             </AnimatePresence>

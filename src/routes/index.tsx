@@ -132,6 +132,12 @@ function Landing() {
             Open Prism Studio
           </Link>
           <Link
+            to="/intelligence"
+            className="inline-flex min-h-11 items-center rounded-full border border-accent/50 bg-accent/12 px-6 text-sm font-medium backdrop-blur transition-all duration-200 hover:-translate-y-0.5 hover:bg-accent/20"
+          >
+            Light Intelligence Lab
+          </Link>
+          <Link
             to="/sandbox"
             className="inline-flex min-h-11 items-center rounded-full border border-border bg-surface/60 px-6 text-sm font-medium backdrop-blur transition-all duration-200 hover:-translate-y-0.5 hover:bg-surface-2"
           >

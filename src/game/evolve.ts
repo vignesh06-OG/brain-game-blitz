@@ -207,3 +207,21 @@ export function evolvePuzzles({
   kept.sort((a, b) => b.fitness - a.fitness);
   return { kept: kept.slice(0, 6), tested: population, rejected };
 }
+
+/**
+ * Raw sampler used by the offline PhotonMind trainer: returns every grown
+ * layout, verified or not, so the learner sees hard negatives too.
+ */
+export function sampleBoards(
+  seed: number,
+  count: number,
+  width = 7,
+  height = 7,
+): Board[] {
+  const rand = rng(seed);
+  const out: Board[] = [];
+  for (let i = 0; i < count; i++) {
+    out.push(grow(rand, width, height, 1 + Math.floor(rand() * 3)));
+  }
+  return out;
+}
