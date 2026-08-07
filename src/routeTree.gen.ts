@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as LabIndexRouteImport } from './routes/lab.index'
 import { Route as PlayIndexRouteImport } from './routes/play.index'
 import { Route as PlayLevelIdRouteImport } from './routes/play.$levelId'
 import { Route as SandboxIndexRouteImport } from './routes/sandbox.index'
@@ -18,6 +19,11 @@ import { Route as StudioIndexRouteImport } from './routes/studio.index'
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LabIndexRoute = LabIndexRouteImport.update({
+  id: '/lab/',
+  path: '/lab/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PlayIndexRoute = PlayIndexRouteImport.update({
@@ -44,6 +50,7 @@ const StudioIndexRoute = StudioIndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/play/$levelId': typeof PlayLevelIdRoute
+  '/lab/': typeof LabIndexRoute
   '/play/': typeof PlayIndexRoute
   '/sandbox/': typeof SandboxIndexRoute
   '/studio/': typeof StudioIndexRoute
@@ -51,6 +58,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/play/$levelId': typeof PlayLevelIdRoute
+  '/lab': typeof LabIndexRoute
   '/play': typeof PlayIndexRoute
   '/sandbox': typeof SandboxIndexRoute
   '/studio': typeof StudioIndexRoute
@@ -59,21 +67,31 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/play/$levelId': typeof PlayLevelIdRoute
+  '/lab/': typeof LabIndexRoute
   '/play/': typeof PlayIndexRoute
   '/sandbox/': typeof SandboxIndexRoute
   '/studio/': typeof StudioIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/play/$levelId' | '/play/' | '/sandbox/' | '/studio/'
+  fullPaths:
+    '/' | '/play/$levelId' | '/lab/' | '/play/' | '/sandbox/' | '/studio/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/play/$levelId' | '/play' | '/sandbox' | '/studio'
-  id: '__root__' | '/' | '/play/$levelId' | '/play/' | '/sandbox/' | '/studio/'
+  to: '/' | '/play/$levelId' | '/lab' | '/play' | '/sandbox' | '/studio'
+  id:
+    | '__root__'
+    | '/'
+    | '/play/$levelId'
+    | '/lab/'
+    | '/play/'
+    | '/sandbox/'
+    | '/studio/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   PlayLevelIdRoute: typeof PlayLevelIdRoute
+  LabIndexRoute: typeof LabIndexRoute
   PlayIndexRoute: typeof PlayIndexRoute
   SandboxIndexRoute: typeof SandboxIndexRoute
   StudioIndexRoute: typeof StudioIndexRoute
@@ -86,6 +104,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lab/': {
+      id: '/lab/'
+      path: '/lab'
+      fullPath: '/lab/'
+      preLoaderRoute: typeof LabIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/play/': {
@@ -122,6 +147,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   PlayLevelIdRoute: PlayLevelIdRoute,
+  LabIndexRoute: LabIndexRoute,
   PlayIndexRoute: PlayIndexRoute,
   SandboxIndexRoute: SandboxIndexRoute,
   StudioIndexRoute: StudioIndexRoute,
@@ -129,13 +155,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
