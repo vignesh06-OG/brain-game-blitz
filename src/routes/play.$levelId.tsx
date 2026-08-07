@@ -262,7 +262,7 @@ function LevelScreen({ levelId }: { levelId: string }) {
             </p>
             <h2 className="mt-3 text-3xl font-extrabold">{level.name}</h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              {game.moves} moves · par {level.par}
+              {game.moves} {game.moves === 1 ? "move" : "moves"} · par {level.par}
               {game.moves <= level.par ? " · perfect route" : ""}
             </p>
             <div className="mt-7 flex flex-col gap-2">
