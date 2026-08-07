@@ -31,7 +31,7 @@ export const LEVELS: Level[] = [
     id: "1-1",
     chapter: 1,
     index: 1,
-    name: "First Light",
+    name: "Angle of Incidence",
     teaches: "Tap a mirror to turn it. Light bends where the mirror faces.",
     hint: "The mirror only has two positions. Try the other one.",
     par: 1,
@@ -49,7 +49,7 @@ export const LEVELS: Level[] = [
     id: "1-2",
     chapter: 1,
     index: 2,
-    name: "Switchback",
+    name: "The Law of Reflection",
     hint: "Send the beam down the far edge first, then back along the bottom.",
     par: 2,
     board: board({
@@ -69,7 +69,7 @@ export const LEVELS: Level[] = [
     id: "1-3",
     chapter: 1,
     index: 3,
-    name: "Two Ways Home",
+    name: "Partial Transmission",
     teaches: "A splitter lets light pass through and bounce at the same time.",
     hint: "One splitter feeds both targets — face it so the reflection points up.",
     par: 1,
@@ -88,7 +88,7 @@ export const LEVELS: Level[] = [
     id: "2-1",
     chapter: 2,
     index: 1,
-    name: "Sieve",
+    name: "Selective Absorption",
     teaches: "Filters keep only their own colour. Drag one from the tray onto the grid.",
     hint: "Each target wants a pure colour. Put the matching filter in its path.",
     par: 2,
@@ -108,7 +108,7 @@ export const LEVELS: Level[] = [
     id: "2-2",
     chapter: 2,
     index: 2,
-    name: "Rainfall",
+    name: "Dispersion",
     teaches: "A prism shatters white light: red runs straight, green and blue peel away.",
     hint: "Place the prism where all three exits have a clear run.",
     par: 1,
@@ -128,7 +128,7 @@ export const LEVELS: Level[] = [
     id: "2-3",
     chapter: 2,
     index: 3,
-    name: "Cold Storage",
+    name: "The Long Blue Wavelength",
     hint: "Blue has to survive the whole trip — the filter strips it, the two mirrors carry it home.",
     par: 2,
     board: board({
@@ -149,7 +149,7 @@ export const LEVELS: Level[] = [
     id: "3-1",
     chapter: 3,
     index: 1,
-    name: "Warm Front",
+    name: "Additive Superposition",
     teaches: "Two beams landing together mix. Red plus green makes yellow.",
     hint: "Both beams must arrive at the same target.",
     par: 1,
@@ -189,7 +189,7 @@ export const LEVELS: Level[] = [
     id: "3-3",
     chapter: 3,
     index: 3,
-    name: "Three Sisters",
+    name: "Spectral Order",
     hint: "The prism does the sorting; the mirrors do the delivering.",
     par: 2,
     board: board({
@@ -210,7 +210,7 @@ export const LEVELS: Level[] = [
     id: "4-1",
     chapter: 4,
     index: 1,
-    name: "Lantern Room",
+    name: "Total Internal Path",
     hint: "Run the beam clockwise around the hall: right edge down, bottom edge back, then up into the lantern.",
     par: 3,
     board: board({
@@ -232,7 +232,7 @@ export const LEVELS: Level[] = [
     id: "4-2",
     chapter: 4,
     index: 2,
-    name: "Spectrum Hall",
+    name: "The Whole Spectrum",
     hint: "The prism aims red straight at its target. Green needs a mirror above it; blue needs the splitter turned.",
     par: 3,
     board: board({
@@ -281,9 +281,37 @@ export const nextLevel = (id: string) => {
   return i >= 0 ? LEVELS[i + 1] : undefined;
 };
 
+/**
+ * The campaign reads as a scientific journey rather than a list of stages:
+ * each chapter is a phenomenon, each level the experiment that demonstrates it.
+ */
 export const CHAPTERS = [
-  { n: 1, name: "Reflection", blurb: "Mirrors, splitters, and the first bend of light." },
-  { n: 2, name: "Refraction", blurb: "Filters and prisms take white light apart." },
-  { n: 3, name: "Chromatics", blurb: "Beams mix. Colour becomes a resource." },
-  { n: 4, name: "Cathedral", blurb: "Long routes, tight walls, no spare moves." },
+  {
+    n: 1,
+    name: "Reflection",
+    subtitle: "How light changes direction",
+    blurb:
+      "Light travels in straight lines until a surface turns it. Mirrors and half-silvered splitters give you the first control over its path.",
+  },
+  {
+    n: 2,
+    name: "Refraction & Absorption",
+    subtitle: "How matter takes light apart",
+    blurb:
+      "White light is a bundle of wavelengths. Filters absorb what they are not; prisms bend each component by a different amount and separate them.",
+  },
+  {
+    n: 3,
+    name: "Superposition",
+    subtitle: "How colours combine",
+    blurb:
+      "Where two beams meet, their channels add. Red and green make yellow, green and blue make cyan — colour stops being decoration and becomes a resource.",
+  },
+  {
+    n: 4,
+    name: "Optical Systems",
+    subtitle: "How it all works together",
+    blurb:
+      "Long optical paths, tight geometry and no spare moves. Every phenomenon you have met, working in one instrument.",
+  },
 ];

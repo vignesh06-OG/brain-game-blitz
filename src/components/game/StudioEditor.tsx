@@ -9,11 +9,14 @@ import {
   ShieldCheck,
   Trash2,
   Undo2,
+  Sparkles,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { BeamInspector } from "@/components/game/BeamInspector";
 import { PrismBoard } from "@/components/game/PrismBoard";
+import { GenomePanel } from "@/components/game/GenomePanel";
 import { ValidationModal } from "@/components/game/ValidationModal";
+import { evolvePuzzles } from "@/game/evolve";
 import { analyse, type Analysis } from "@/game/analysis";
 import { colorGlyph, colorName, colorVar } from "@/game/engine";
 import { loadPrefs } from "@/game/progress";
@@ -31,6 +34,10 @@ const TOOLS: { kind: PieceKind; label: string; hint: string }[] = [
   { kind: "prism", label: "Prism", hint: "Separates white light into R/G/B." },
   { kind: "filter", label: "Filter", hint: "Only lets its own channels through." },
   { kind: "wall", label: "Wall", hint: "Blocks everything." },
+  { kind: "glass", label: "Glass", hint: "Passes light through, dimming it slightly." },
+  { kind: "crystal", label: "Crystal", hint: "Passes light and sheds rainbow caustics." },
+  { kind: "water", label: "Water", hint: "Absorbs red, tinting the beam cyan." },
+  { kind: "fog", label: "Fog", hint: "Scatters light sideways and halves its energy." },
 ];
 
 const COLORS: ColorMask[] = [1, 2, 4, 3, 5, 6, 7];
@@ -52,6 +59,8 @@ export default function StudioEditor({ mode }: Props) {
   const [code, setCode] = useState("");
   const [copied, setCopied] = useState(false);
   const [importError, setImportError] = useState<string | null>(null);
+  const [evolving, setEvolving] = useState(false);
+  const [evolveNote, setEvolveNote] = useState<string | null>(null);
 
   useEffect(() => setPrefs(loadPrefs()), []);
   const rm = prefs.reduceMotion;
@@ -83,6 +92,30 @@ export default function StudioEditor({ mode }: Props) {
   }, [board]);
 
   const shareCode = useMemo(() => encodeBoard(board), [board]);
+
+  /** Deterministic generate → validate → score → keep loop, seeded per run. */
+  const evolve = useCallback(() => {
+    setEvolving(true);
+    setEvolveNote(null);
+    window.setTimeout(() => {
+      const seed = Math.floor(Math.random() * 1e6);
+      const { kept, tested, rejected } = evolvePuzzles({
+        seed,
+        width: board.width,
+        height: board.height,
+      });
+      const best = kept[0];
+      if (best) {
+        editor.load(best.board);
+        setEvolveNote(
+          `Kept ${kept.length} of ${tested} candidates (${rejected} rejected). Loaded fitness ${best.fitness}, ${best.analysis.minMoves} moves, ${best.analysis.rating}.`,
+        );
+      } else {
+        setEvolveNote(`All ${tested} candidates failed validation. Try again for a new seed.`);
+      }
+      setEvolving(false);
+    }, 40);
+  }, [board.width, board.height, editor]);
 
   const copyCode = async () => {
     try {
@@ -343,6 +376,33 @@ export default function StudioEditor({ mode }: Props) {
             Validate puzzle
           </button>
         )}
+
+        {mode === "studio" && (
+          <div className="rounded-2xl border border-border bg-surface/70 p-4 backdrop-blur">
+            <p className="font-display text-xs tracking-widest text-muted-foreground uppercase">
+              Puzzle evolution
+            </p>
+            <p className="mt-1.5 text-xs text-muted-foreground">
+              Grows candidate boards, validates each with the solver and keeps only the fittest.
+            </p>
+            <button
+              type="button"
+              onClick={evolve}
+              disabled={evolving}
+              className="mt-3 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-accent/40 bg-accent/10 text-sm font-medium transition-all duration-200 hover:bg-accent/20 active:scale-95 disabled:opacity-50"
+            >
+              <Sparkles className="h-4 w-4 text-accent" aria-hidden="true" />
+              {evolving ? "Evolving…" : "Evolve a puzzle"}
+            </button>
+            {evolveNote && (
+              <p className="mt-2 text-xs text-muted-foreground" aria-live="polite">
+                {evolveNote}
+              </p>
+            )}
+          </div>
+        )}
+
+        <GenomePanel board={board} reduceMotion={rm} />
 
         <div className="rounded-2xl border border-border bg-surface/70 p-4 backdrop-blur">
           <p className="font-display text-xs tracking-widest text-muted-foreground uppercase">

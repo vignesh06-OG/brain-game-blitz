@@ -17,6 +17,11 @@ const KINDS: PieceKind[] = [
   "filter",
   "prism",
   "wall",
+  // Appended only — existing indices must never move or old codes break.
+  "glass",
+  "crystal",
+  "water",
+  "fog",
 ];
 
 const ALPHABET = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"; // Crockford base32

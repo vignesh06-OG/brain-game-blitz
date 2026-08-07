@@ -15,7 +15,14 @@ export type PieceKind =
   | "splitter"
   | "filter"
   | "prism"
-  | "wall";
+  | "wall"
+  | "glass"
+  | "crystal"
+  | "water"
+  | "fog";
+
+/** Materials attenuate or scatter light instead of routing it. */
+export const MATERIALS: PieceKind[] = ["glass", "crystal", "water", "fog"];
 
 export interface Piece {
   id: string;
@@ -47,6 +54,58 @@ export interface Level {
   teaches?: string;
   par: number;
   board: Board;
+}
+
+/**
+ * Tunable physics for the Light Laboratory. The defaults are the shipping
+ * constants — campaign play always traces with DEFAULT_SIM, so gameplay stays
+ * deterministic no matter what is dialled in the lab.
+ */
+export interface SimParams {
+  /** Energy retained per reflection (mirror / splitter / crystal). */
+  reflectionEfficiency: number;
+  /** Energy lost per cell travelled. */
+  attenuation: number;
+  /** Dispersion strength of prisms and crystals. */
+  prismIndex: number;
+  /** Emitter output energy. */
+  beamIntensity: number;
+  /** How much fog bleeds light sideways. */
+  scattering: number;
+  /** Rays below this energy stop propagating. */
+  minIntensity: number;
+}
+
+export const DEFAULT_SIM: SimParams = {
+  reflectionEfficiency: 1,
+  attenuation: 0,
+  prismIndex: 1,
+  beamIntensity: 1,
+  scattering: 0.5,
+  minIntensity: 0.02,
+};
+
+export type BeamEventKind =
+  | "emit"
+  | "reflect"
+  | "split"
+  | "disperse"
+  | "filter"
+  | "absorb"
+  | "attenuate"
+  | "scatter"
+  | "hit"
+  | "escape";
+
+/** A single decision the tracer made — the source of Commentary Mode. */
+export interface BeamEvent {
+  kind: BeamEventKind;
+  /** Cell where it happened. */
+  cell: string;
+  color: ColorMask;
+  intensity: number;
+  /** Plain-English explanation of the engine decision. */
+  text: string;
 }
 
 /** Live telemetry for a single beam edge — powers the beam inspector. */
@@ -82,6 +141,8 @@ export interface TraceResult {
   solved: boolean;
   targetCount: number;
   solvedCount: number;
+  /** Ordered log of every interaction, for Commentary Mode. */
+  events: BeamEvent[];
 }
 
 export const key = (x: number, y: number) => `${x},${y}`;

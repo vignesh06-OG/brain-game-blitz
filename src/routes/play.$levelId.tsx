@@ -5,13 +5,23 @@ import {
   Eye,
   Lightbulb,
   RotateCcw,
+  Radio,
   Sparkles,
   TriangleAlert,
   Undo2,
+  Volume2,
+  VolumeX,
 } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { AchievementToast } from "@/components/game/AchievementToast";
+import { AmbientBackdrop } from "@/components/game/AmbientBackdrop";
 import { CinematicSolve } from "@/components/game/CinematicSolve";
+import { CommentaryPanel } from "@/components/game/CommentaryPanel";
 import { PrismBoard } from "@/components/game/PrismBoard";
+import { SolveTimeline } from "@/components/game/SolveTimeline";
+import { evaluate, type Achievement } from "@/game/achievements";
+import { setAudioEnabled } from "@/game/audio";
+import { useAdaptiveAudio } from "@/game/useAdaptiveAudio";
 import { colorGlyph, colorName } from "@/game/engine";
 import { getLevel, nextLevel } from "@/game/levels";
 import { loadPrefs, recordSolve, savePrefs } from "@/game/progress";
@@ -83,20 +93,59 @@ function LevelScreen({ levelId }: { levelId: string }) {
   const [showTeach, setShowTeach] = useState(!!level.teaches);
   const [celebrated, setCelebrated] = useState(false);
   const [nudgeDismissed, setNudgeDismissed] = useState(false);
+  const [commentary, setCommentary] = useState(false);
+  const [audioOn, setAudioOn] = useState(false);
+  const [unlocked, setUnlocked] = useState<Achievement[]>([]);
+  const undosRef = useRef(0);
+  const startedAt = useRef(Date.now());
   const next = nextLevel(levelId);
   const rm = prefs.reduceMotion;
 
   useEffect(() => setPrefs(loadPrefs()), []);
 
+  useAdaptiveAudio(game.result, game.litKeys.length, audioOn);
+
+  // Stop the audio graph when the player leaves the puzzle.
+  useEffect(() => () => void setAudioEnabled(false), []);
+
+  const mixedLit = useMemo(
+    () =>
+      game.litKeys.filter((k) => {
+        const c = game.board.cells[k]?.color ?? 7;
+        return (c & 1) + ((c >> 1) & 1) + ((c >> 2) & 1) > 1;
+      }).length,
+    [game.litKeys, game.board],
+  );
+
   useEffect(() => {
     if (game.result.solved && !celebrated) {
       setCelebrated(true);
-      recordSolve(level.id, game.moves);
+      const progress = recordSolve(level.id, game.moves);
+      const perfect = Object.entries(progress).filter(([, m]) => m <= level.par).length;
+      setUnlocked(
+        evaluate({
+          levelId: level.id,
+          moves: game.moves,
+          par: level.par,
+          seconds: Math.round((Date.now() - startedAt.current) / 1000),
+          undos: undosRef.current,
+          hintsUsed: hintLevel,
+          mixedTargets: mixedLit,
+          splits: game.result.events.filter((e) => e.kind === "split" || e.kind === "disperse")
+            .length,
+          reflections: game.result.events.filter((e) => e.kind === "reflect").length,
+          totalSolved: Object.keys(progress).length,
+          perfectSolves: perfect,
+        }),
+      );
     }
-  }, [game.result.solved, game.moves, level.id, celebrated]);
+  }, [game.result, game.moves, level.id, level.par, celebrated, hintLevel, mixedLit]);
 
   const restart = useCallback(() => {
     game.reset();
+    undosRef.current = 0;
+    startedAt.current = Date.now();
+    setUnlocked([]);
     setHintLevel(0);
     setCelebrated(false);
     setNudgeDismissed(false);
@@ -109,7 +158,10 @@ function LevelScreen({ levelId }: { levelId: string }) {
       const el = e.target as HTMLElement | null;
       if (el && ["INPUT", "TEXTAREA"].includes(el.tagName)) return;
       const k = e.key.toLowerCase();
-      if (k === "u") game.undo();
+      if (k === "u") {
+        undosRef.current += 1;
+        game.undo();
+      }
       else if (k === "r") restart();
       else if (k === "h") setHintLevel((h) => Math.min(h + 1, 2));
       else if (k === "escape") setShowTeach(false);
@@ -157,8 +209,15 @@ function LevelScreen({ levelId }: { levelId: string }) {
         transition: { duration: 0.35, ease: "easeOut" as const },
       };
 
+  const toggleAudio = () => {
+    const on = !audioOn;
+    setAudioOn(on);
+    void setAudioEnabled(on);
+  };
+
   return (
     <main className={cn("min-h-dvh aurora px-4 py-6 sm:px-6", rm && "reduce-motion")}>
+      <AmbientBackdrop density={10} />
       <div className="mx-auto max-w-5xl">
         <motion.header
           {...fade}
@@ -302,7 +361,10 @@ function LevelScreen({ levelId }: { levelId: string }) {
             <div className="flex flex-wrap gap-2">
               <button
                 type="button"
-                onClick={game.undo}
+                onClick={() => {
+                  undosRef.current += 1;
+                  game.undo();
+                }}
                 disabled={!game.canUndo}
                 className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-border bg-surface/70 px-4 text-sm transition-all duration-200 hover:bg-surface-2 active:scale-95 disabled:opacity-40 disabled:active:scale-100"
               >
@@ -352,6 +414,47 @@ function LevelScreen({ levelId }: { levelId: string }) {
                         : level.hint}
                     </p>
                   </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={toggleAudio}
+                aria-pressed={audioOn}
+                className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-border bg-surface/70 px-3 text-xs transition-all duration-200 hover:bg-surface-2 active:scale-95"
+              >
+                {audioOn ? (
+                  <Volume2 className="h-4 w-4 text-accent" aria-hidden="true" />
+                ) : (
+                  <VolumeX className="h-4 w-4" aria-hidden="true" />
+                )}
+                Adaptive score
+              </button>
+              <button
+                type="button"
+                onClick={() => setCommentary((c) => !c)}
+                aria-pressed={commentary}
+                className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-border bg-surface/70 px-3 text-xs transition-all duration-200 hover:bg-surface-2 active:scale-95"
+              >
+                <Radio className={cn("h-4 w-4", commentary && "text-accent")} aria-hidden="true" />
+                Commentary
+              </button>
+            </div>
+
+            <AnimatePresence initial={false}>
+              {commentary && (
+                <motion.div
+                  key="commentary"
+                  initial={rm ? false : { opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: rm ? 0 : 0.28, ease: "easeOut" }}
+                  className="space-y-3 overflow-hidden"
+                >
+                  <CommentaryPanel result={game.result} reduceMotion={rm} limit={10} />
+                  <SolveTimeline timeline={game.timeline} reduceMotion={rm} />
                 </motion.div>
               )}
             </AnimatePresence>
@@ -440,6 +543,8 @@ function LevelScreen({ levelId }: { levelId: string }) {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <AchievementToast unlocked={unlocked} reduceMotion={rm} />
 
       {/* Cinematic victory: bloom, particles, star rating and instant replay */}
       <CinematicSolve
