@@ -36,13 +36,13 @@ export function AmbientBackdrop({ density = 14 }: Props) {
       <motion.div
         className="absolute -left-24 top-1/4 h-[36rem] w-[36rem] rounded-full opacity-[0.16] blur-3xl"
         style={{ background: "var(--beam-cyan)" }}
-        animate={reduce ? undefined : { x: [0, 60, 0], y: [0, -40, 0] }}
+        animate={reduce ? {} : { x: [0, 60, 0], y: [0, -40, 0] }}
         transition={{ duration: 28, repeat: Infinity, ease: "easeInOut" }}
       />
       <motion.div
         className="absolute -right-32 bottom-0 h-[32rem] w-[32rem] rounded-full opacity-[0.14] blur-3xl"
         style={{ background: "var(--beam-magenta)" }}
-        animate={reduce ? undefined : { x: [0, -50, 0], y: [0, 30, 0] }}
+        animate={reduce ? {} : { x: [0, -50, 0], y: [0, 30, 0] }}
         transition={{ duration: 34, repeat: Infinity, ease: "easeInOut" }}
       />
       {!reduce &&
