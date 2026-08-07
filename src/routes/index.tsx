@@ -24,6 +24,15 @@ export const Route = createFileRoute("/")({
 });
 
 function Landing() {
+  const rise = {
+    hidden: { opacity: 0, y: 22 },
+    show: {
+      opacity: 1,
+      y: 0,
+      transition: { type: "spring" as const, stiffness: 300, damping: 28 },
+    },
+  };
+
   const beams = [
     { c: "var(--beam-red)", d: "M -100 120 L 1600 420" },
     { c: "var(--beam-cyan)", d: "M -100 320 L 1600 60" },
