@@ -68,8 +68,8 @@ export interface TraceResult {
 
 export const key = (x: number, y: number) => `${x},${y}`;
 export const parseKey = (k: string): [number, number] => {
-  const [x, y] = k.split(",").map(Number);
-  return [x, y];
+  const parts = k.split(",");
+  return [Number(parts[0]), Number(parts[1])];
 };
 
 export const DELTA: Record<Dir, [number, number]> = {
