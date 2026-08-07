@@ -10,6 +10,7 @@ import {
   Undo2,
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { CinematicSolve } from "@/components/game/CinematicSolve";
 import { PrismBoard } from "@/components/game/PrismBoard";
 import { colorGlyph, colorName } from "@/game/engine";
 import { getLevel, nextLevel } from "@/game/levels";
@@ -125,6 +126,7 @@ function LevelScreen({ levelId }: { levelId: string }) {
 
   const { solvedCount, targetCount, solved } = game.result;
   const misrouted = game.misroutedKeys.length;
+  const stars = Math.max(0, 3 - Math.max(0, game.moves - level.par));
   const progress = targetCount ? solvedCount / targetCount : 0;
 
   const status = solved
@@ -439,112 +441,53 @@ function LevelScreen({ levelId }: { levelId: string }) {
         )}
       </AnimatePresence>
 
-      {/* End of level */}
-      <AnimatePresence>
-        {solved && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: rm ? 0 : 0.25 }}
-            className="fixed inset-0 z-30 grid place-items-center bg-background/80 px-6 backdrop-blur-sm"
-            role="dialog"
-            aria-modal="true"
-            aria-label={`${level.name} solved`}
-          >
-            <motion.div
-              initial={rm ? false : { opacity: 0, scale: 0.9, y: 18 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ type: "spring", stiffness: 320, damping: 26 }}
-              className="relative w-full max-w-sm overflow-hidden rounded-3xl border border-primary/40 bg-surface p-8 text-center"
-              style={{ boxShadow: "var(--shadow-glow)" }}
-            >
-              {!rm && (
-                <motion.div
-                  aria-hidden="true"
-                  className="pointer-events-none absolute -top-24 left-1/2 h-56 w-56 -translate-x-1/2 rounded-full"
-                  style={{
-                    background:
-                      "radial-gradient(circle, color-mix(in oklab, var(--primary) 45%, transparent), transparent 70%)",
-                  }}
-                  initial={{ scale: 0.4, opacity: 0 }}
-                  animate={{ scale: 1.4, opacity: [0, 0.9, 0.35] }}
-                  transition={{ duration: 1.1, ease: "easeOut" }}
-                />
-              )}
-              <p className="font-display text-xs tracking-[0.3em] text-primary uppercase">
-                {game.overPar ? "Solved" : "Perfect route"}
-              </p>
-              <h2 className="mt-3 text-3xl font-extrabold">{level.name}</h2>
-
-              <div className="mt-4 flex justify-center gap-1.5" aria-hidden="true">
-                {[0, 1, 2].map((i) => {
-                  const earned = game.moves <= level.par + i;
-                  return (
-                    <motion.span
-                      key={i}
-                      initial={rm ? false : { scale: 0, rotate: -40 }}
-                      animate={{ scale: 1, rotate: 0 }}
-                      transition={{ delay: rm ? 0 : 0.15 + i * 0.12, type: "spring", stiffness: 420, damping: 18 }}
-                      className={cn(
-                        "text-2xl",
-                        earned ? "text-primary text-glow" : "text-muted-foreground/30",
-                      )}
-                    >
-                      ★
-                    </motion.span>
-                  );
-                })}
-              </div>
-
-              <p className="mt-3 text-sm text-muted-foreground">
-                {game.moves} {game.moves === 1 ? "move" : "moves"} · par {level.par}
-                {game.overPar
-                  ? ` · ${game.moves - level.par} over — there is a tighter line`
-                  : " · nothing wasted"}
-              </p>
-
-              <div className="mt-7 flex flex-col gap-2">
-                {next ? (
-                  <button
-                    type="button"
-                    onClick={() =>
-                      navigate({ to: "/play/$levelId", params: { levelId: next.id } })
-                    }
-                    className={cn(
-                      "min-h-11 rounded-full bg-primary px-6 font-semibold text-primary-foreground transition-transform duration-200 hover:scale-[1.02] active:scale-95",
-                      !rm && "sheen",
-                    )}
-                  >
-                    Next puzzle: {next.name}
-                  </button>
-                ) : (
-                  <Link
-                    to="/play"
-                    className="min-h-11 rounded-full bg-primary px-6 py-3 font-semibold text-primary-foreground"
-                  >
-                    You finished every puzzle
-                  </Link>
+      {/* Cinematic victory: bloom, particles, star rating and instant replay */}
+      <CinematicSolve
+        open={solved}
+        title={level.name}
+        moves={game.moves}
+        par={level.par}
+        stars={stars}
+        frames={game.timeline}
+        colorblind={prefs.colorblind}
+        reduceMotion={rm}
+        actions={
+          <>
+            {next ? (
+              <button
+                type="button"
+                onClick={() => navigate({ to: "/play/$levelId", params: { levelId: next.id } })}
+                className={cn(
+                  "min-h-11 w-full rounded-full bg-primary px-6 font-semibold text-primary-foreground transition-transform duration-200 hover:scale-[1.02] active:scale-95",
+                  !rm && "sheen",
                 )}
-                <button
-                  type="button"
-                  onClick={restart}
-                  className="min-h-11 rounded-full border border-border px-6 text-sm transition-colors hover:bg-surface-2"
-                >
-                  {game.overPar ? "Retry for par" : "Replay this puzzle"}
-                </button>
-                <Link
-                  to="/play"
-                  className="min-h-11 text-sm text-muted-foreground transition-colors hover:text-foreground"
-                >
-                  Back to all puzzles
-                </Link>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+              >
+                Next puzzle: {next.name}
+              </button>
+            ) : (
+              <Link
+                to="/play"
+                className="min-h-11 w-full rounded-full bg-primary px-6 py-3 font-semibold text-primary-foreground"
+              >
+                You finished every puzzle
+              </Link>
+            )}
+            <button
+              type="button"
+              onClick={restart}
+              className="min-h-11 w-full rounded-full border border-border px-6 text-sm transition-colors hover:bg-surface-2"
+            >
+              {game.overPar ? "Retry for par" : "Replay this puzzle"}
+            </button>
+            <Link
+              to="/play"
+              className="min-h-11 text-sm text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Back to all puzzles
+            </Link>
+          </>
+        }
+      />
     </main>
   );
 }
