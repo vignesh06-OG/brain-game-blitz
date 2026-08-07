@@ -34,7 +34,7 @@ function PieceShape({ piece, satisfied }: { piece: Piece; satisfied: boolean }) 
           />
           <circle cx={0} cy={0} r={13} fill={color} filter="url(#glow)" />
           <g transform={`rotate(${piece.rot * 90})`}>
-            <path d="M 0 -14 L 8 -30 L -8 -30 Z" fill={color} />
+            <path d="M 0 -36 L 10 -16 L -10 -16 Z" fill={color} />
           </g>
         </g>
       );
