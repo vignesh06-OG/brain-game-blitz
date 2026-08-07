@@ -96,12 +96,14 @@ function PieceShape({
             r={32}
             fill={satisfied ? color : "transparent"}
             stroke={ring}
+            initial={{ fillOpacity: 0, strokeWidth: 3, scale: 0.94 }}
             animate={{
               fillOpacity: satisfied ? 0.22 : 0,
               strokeWidth: satisfied ? 5 : 3,
               scale: satisfied ? 1 : 0.94,
             }}
             transition={t}
+
             strokeDasharray={satisfied ? undefined : "10 8"}
             filter={satisfied ? "url(#glow)" : undefined}
             style={{ transformOrigin: "center", transformBox: "fill-box" }}
