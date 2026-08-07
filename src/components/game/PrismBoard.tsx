@@ -231,6 +231,63 @@ function PieceShape({
         />
       );
 
+    case "glass":
+      return (
+        <g>
+          <rect
+            x={-32}
+            y={-32}
+            width={64}
+            height={64}
+            rx={10}
+            fill="var(--beam-white)"
+            fillOpacity={0.1}
+            stroke="var(--beam-white)"
+            strokeOpacity={0.55}
+            strokeWidth={2.5}
+          />
+          <path d="M -20 22 L 18 -20" stroke="var(--beam-white)" strokeOpacity={0.45} strokeWidth={3} />
+        </g>
+      );
+
+    case "crystal":
+      return (
+        <g>
+          <path
+            d="M 0 -34 L 30 0 L 0 34 L -30 0 Z"
+            fill="var(--beam-cyan)"
+            fillOpacity={0.16}
+            stroke="var(--beam-cyan)"
+            strokeWidth={3}
+            filter="url(#glow)"
+          />
+          <path d="M 0 -34 L 0 34" stroke="var(--beam-magenta)" strokeOpacity={0.6} strokeWidth={2} />
+        </g>
+      );
+
+    case "water":
+      return (
+        <g>
+          <circle cx={0} cy={0} r={31} fill="var(--beam-blue)" fillOpacity={0.14} stroke="var(--beam-blue)" strokeWidth={2.5} />
+          <path
+            d="M -22 4 q 11 -12 22 0 q 11 12 22 0"
+            fill="none"
+            stroke="var(--beam-cyan)"
+            strokeWidth={3}
+            opacity={0.85}
+          />
+        </g>
+      );
+
+    case "fog":
+      return (
+        <g opacity={0.85}>
+          <circle cx={-10} cy={-6} r={19} fill="var(--muted-foreground)" fillOpacity={0.28} />
+          <circle cx={12} cy={2} r={22} fill="var(--muted-foreground)" fillOpacity={0.22} />
+          <circle cx={-2} cy={14} r={15} fill="var(--muted-foreground)" fillOpacity={0.2} />
+        </g>
+      );
+
     case "wall":
       return (
         <rect
@@ -269,6 +326,16 @@ function describe(piece: Piece | undefined, state: CellState): string {
       return "Prism";
     case "wall":
       return "Wall";
+    case "glass":
+      return "Glass block";
+    case "crystal":
+      return "Crystal";
+    case "water":
+      return "Water";
+    case "fog":
+      return "Fog bank";
+    default:
+      return "Piece";
   }
 }
 
