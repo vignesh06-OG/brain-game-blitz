@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PlayIndexRouteImport } from './routes/play.index'
+import { Route as PlayLevelIdRouteImport } from './routes/play.$levelId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -22,30 +23,39 @@ const PlayIndexRoute = PlayIndexRouteImport.update({
   path: '/play/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PlayLevelIdRoute = PlayLevelIdRouteImport.update({
+  id: '/play/$levelId',
+  path: '/play/$levelId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/play/$levelId': typeof PlayLevelIdRoute
   '/play/': typeof PlayIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/play/$levelId': typeof PlayLevelIdRoute
   '/play': typeof PlayIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/play/$levelId': typeof PlayLevelIdRoute
   '/play/': typeof PlayIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/play/'
+  fullPaths: '/' | '/play/$levelId' | '/play/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/play'
-  id: '__root__' | '/' | '/play/'
+  to: '/' | '/play/$levelId' | '/play'
+  id: '__root__' | '/' | '/play/$levelId' | '/play/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  PlayLevelIdRoute: typeof PlayLevelIdRoute
   PlayIndexRoute: typeof PlayIndexRoute
 }
 
@@ -65,11 +75,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PlayIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/play/$levelId': {
+      id: '/play/$levelId'
+      path: '/play/$levelId'
+      fullPath: '/play/$levelId'
+      preLoaderRoute: typeof PlayLevelIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  PlayLevelIdRoute: PlayLevelIdRoute,
   PlayIndexRoute: PlayIndexRoute,
 }
 export const routeTree = rootRouteImport
