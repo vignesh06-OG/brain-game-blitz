@@ -42,7 +42,6 @@ function rng(seed: number) {
 let uid = 0;
 const piece = (p: Omit<Piece, "id">): Piece => ({ id: `g${(uid++).toString(36)}`, ...p });
 
-const COLORS: ColorMask[] = [1, 2, 4, 3, 5, 6, 7];
 
 /**
  * Grows a candidate by construction, not by chance: it walks a beam from an
