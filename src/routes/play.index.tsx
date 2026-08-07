@@ -1,8 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { motion } from "motion/react";
 import { ArrowLeft, Check, Lock } from "lucide-react";
 import { useEffect, useState } from "react";
 import { CHAPTERS, LEVELS } from "@/game/levels";
 import { loadProgress } from "@/game/progress";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/play/")({
   head: () => ({
@@ -53,19 +55,36 @@ function LevelSelect() {
                 </div>
               </div>
               <ul className="mt-4 grid gap-3 sm:grid-cols-3">
-                {LEVELS.filter((l) => l.chapter === chapter.n).map((level) => {
+                {LEVELS.filter((l) => l.chapter === chapter.n).map((level, i) => {
                   const best = progress[level.id];
                   return (
-                    <li key={level.id}>
+                    <motion.li
+                      key={level.id}
+                      initial={{ opacity: 0, y: 16 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{
+                        delay: 0.04 * i,
+                        type: "spring",
+                        stiffness: 320,
+                        damping: 28,
+                      }}
+                    >
                       <Link
                         to="/play/$levelId"
                         params={{ levelId: level.id }}
-                        className="group block rounded-2xl border border-border bg-surface/60 p-4 backdrop-blur transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/50 hover:bg-surface-2"
+                        className={cn(
+                          "group block rounded-2xl border bg-surface/60 p-4 backdrop-blur transition-all duration-200 hover:-translate-y-1 hover:bg-surface-2 active:scale-[0.98]",
+                          best !== undefined
+                            ? "border-primary/40 hover:border-primary"
+                            : "border-border hover:border-primary/50",
+                        )}
                       >
                         <div className="flex items-center justify-between gap-2">
                           <span className="font-display font-semibold">{level.name}</span>
                           {best !== undefined ? (
-                            <Check className="h-4 w-4 shrink-0 text-primary" aria-label="Solved" />
+                            <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-primary/15 transition-transform duration-200 group-hover:scale-110">
+                              <Check className="h-3.5 w-3.5 text-primary" aria-label="Solved" />
+                            </span>
                           ) : (
                             <Lock
                               className="h-4 w-4 shrink-0 text-muted-foreground opacity-40"
@@ -78,7 +97,7 @@ function LevelSelect() {
                           {best !== undefined ? ` · your best ${best}` : ""}
                         </p>
                       </Link>
-                    </li>
+                    </motion.li>
                   );
                 })}
               </ul>

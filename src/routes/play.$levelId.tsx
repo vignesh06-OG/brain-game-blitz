@@ -1,12 +1,15 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { AnimatePresence, motion } from "motion/react";
 import {
   ArrowLeft,
   Eye,
   Lightbulb,
   RotateCcw,
+  Sparkles,
+  TriangleAlert,
   Undo2,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { PrismBoard } from "@/components/game/PrismBoard";
 import { colorGlyph, colorName } from "@/game/engine";
 import { getLevel, nextLevel } from "@/game/levels";
@@ -28,6 +31,7 @@ export const Route = createFileRoute("/play/$levelId")({
         { name: "description", content: description },
         { property: "og:title", content: title },
         { property: "og:description", content: description },
+        ...(level ? [] : [{ name: "robots", content: "noindex" }]),
       ],
     };
   },
@@ -74,10 +78,12 @@ function LevelScreen({ levelId }: { levelId: string }) {
   const navigate = useNavigate();
   const game = useGame(level);
   const [hintLevel, setHintLevel] = useState(0);
-  const [prefs, setPrefs] = useState(() => ({ colorblind: false, reduceMotion: false }));
+  const [prefs, setPrefs] = useState({ colorblind: false, reduceMotion: false });
   const [showTeach, setShowTeach] = useState(!!level.teaches);
   const [celebrated, setCelebrated] = useState(false);
+  const [nudgeDismissed, setNudgeDismissed] = useState(false);
   const next = nextLevel(levelId);
+  const rm = prefs.reduceMotion;
 
   useEffect(() => setPrefs(loadPrefs()), []);
 
@@ -88,23 +94,79 @@ function LevelScreen({ levelId }: { levelId: string }) {
     }
   }, [game.result.solved, game.moves, level.id, celebrated]);
 
+  const restart = useCallback(() => {
+    game.reset();
+    setHintLevel(0);
+    setCelebrated(false);
+    setNudgeDismissed(false);
+  }, [game]);
+
+  // Keyboard shortcuts — desktop players never have to reach for the mouse.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const el = e.target as HTMLElement | null;
+      if (el && ["INPUT", "TEXTAREA"].includes(el.tagName)) return;
+      const k = e.key.toLowerCase();
+      if (k === "u") game.undo();
+      else if (k === "r") restart();
+      else if (k === "h") setHintLevel((h) => Math.min(h + 1, 2));
+      else if (k === "escape") setShowTeach(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [game, restart]);
+
   const togglePref = (k: "colorblind" | "reduceMotion") => {
-    const next = { ...prefs, [k]: !prefs[k] };
-    setPrefs(next);
-    savePrefs(next);
+    const updated = { ...prefs, [k]: !prefs[k] };
+    setPrefs(updated);
+    savePrefs(updated);
   };
 
+  const { solvedCount, targetCount, solved } = game.result;
+  const misrouted = game.misroutedKeys.length;
+  const progress = targetCount ? solvedCount / targetCount : 0;
+
+  const status = solved
+    ? { tone: "good" as const, text: "Every target is burning the right colour." }
+    : misrouted
+      ? {
+          tone: "bad" as const,
+          text:
+            misrouted === 1
+              ? "One target is getting the wrong mix of light."
+              : `${misrouted} targets are getting the wrong mix of light.`,
+        }
+      : solvedCount
+        ? {
+            tone: "mid" as const,
+            text: `${solvedCount} of ${targetCount} lit — keep routing.`,
+          }
+        : {
+            tone: "mid" as const,
+            text: "No light is landing yet. Follow the beam and find the first turn.",
+          };
+
+  const fade = rm
+    ? { initial: false as const, animate: { opacity: 1 }, transition: { duration: 0 } }
+    : {
+        initial: { opacity: 0, y: 10 },
+        animate: { opacity: 1, y: 0 },
+        transition: { duration: 0.35, ease: "easeOut" as const },
+      };
+
   return (
-    <main
-      className={cn("min-h-dvh aurora px-4 py-6 sm:px-6", prefs.reduceMotion && "reduce-motion")}
-    >
+    <main className={cn("min-h-dvh aurora px-4 py-6 sm:px-6", rm && "reduce-motion")}>
       <div className="mx-auto max-w-5xl">
-        <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4">
+        <motion.header
+          {...fade}
+          className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3"
+        >
           <div className="flex min-w-0 items-center gap-3">
             <Link
               to="/play"
               aria-label="Back to puzzle list"
-              className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-border bg-surface/70 transition-colors hover:bg-surface-2"
+              className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-border bg-surface/70 transition-all duration-200 hover:-translate-x-0.5 hover:bg-surface-2"
             >
               <ArrowLeft className="h-4 w-4" aria-hidden="true" />
             </Link>
@@ -115,79 +177,139 @@ function LevelScreen({ levelId }: { levelId: string }) {
               <h1 className="truncate text-xl font-extrabold sm:text-2xl">{level.name}</h1>
             </div>
           </div>
-          <div className="flex items-center gap-2 text-sm">
-            <span className="rounded-full border border-border bg-surface/70 px-3 py-1.5 tabular-nums">
+          <div className="flex shrink-0 items-center gap-2 text-sm">
+            <motion.span
+              key={game.moves}
+              initial={rm ? false : { scale: 0.8, opacity: 0.4 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: "spring", stiffness: 500, damping: 22 }}
+              className={cn(
+                "rounded-full border px-3 py-1.5 tabular-nums transition-colors",
+                game.overPar
+                  ? "border-accent/50 bg-accent/10 text-foreground"
+                  : "border-border bg-surface/70",
+              )}
+            >
               {game.moves} / par {level.par}
-            </span>
+            </motion.span>
             <span className="rounded-full border border-border bg-surface/70 px-3 py-1.5 tabular-nums">
-              {game.result.solvedCount}/{game.result.targetCount} lit
+              {solvedCount}/{targetCount} lit
             </span>
           </div>
-        </header>
+        </motion.header>
 
-        <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_260px]">
-          <div className="min-w-0">
+        {/* Target progress rail */}
+        <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-surface-2">
+          <motion.div
+            className="h-full rounded-full bg-primary"
+            style={{ boxShadow: "var(--shadow-glow)" }}
+            animate={{ width: `${progress * 100}%` }}
+            transition={rm ? { duration: 0 } : { type: "spring", stiffness: 180, damping: 26 }}
+          />
+        </div>
+
+        <div className="mt-5 grid gap-6 lg:grid-cols-[minmax(0,1fr)_264px]">
+          <motion.div {...fade} className="min-w-0">
             <PrismBoard
               board={game.board}
               result={game.result}
               onActivate={game.activate}
               colorblind={prefs.colorblind}
               placing={!!game.selectedTrayId}
+              reduceMotion={rm}
+              litKeys={game.litKeys}
+              misroutedKeys={game.misroutedKeys}
+              lastTouched={game.lastTouched}
             />
 
+            {/* Live status — the game always says what is wrong, never just fails. */}
+            <div
+              aria-live="polite"
+              className={cn(
+                "mt-4 flex items-center gap-2.5 rounded-2xl border px-4 py-3 text-sm transition-colors duration-300",
+                status.tone === "bad"
+                  ? "border-destructive/40 bg-destructive/10 text-foreground"
+                  : status.tone === "good"
+                    ? "border-primary/40 bg-primary/10"
+                    : "border-border bg-surface/60",
+              )}
+            >
+              {status.tone === "bad" ? (
+                <TriangleAlert
+                  className="h-4 w-4 shrink-0 text-destructive animate-shake"
+                  aria-hidden="true"
+                />
+              ) : (
+                <Sparkles
+                  className={cn(
+                    "h-4 w-4 shrink-0",
+                    status.tone === "good" ? "text-primary" : "text-muted-foreground",
+                  )}
+                  aria-hidden="true"
+                />
+              )}
+              <p className="min-w-0">{status.text}</p>
+            </div>
+
             {game.board.tray.length > 0 && (
-              <div className="mt-4 rounded-2xl border border-border bg-surface/60 p-3 backdrop-blur">
+              <div className="mt-3 rounded-2xl border border-border bg-surface/60 p-3 backdrop-blur">
                 <p className="mb-2 text-xs tracking-widest text-muted-foreground uppercase">
                   Tray — pick a piece, then tap a cell
                 </p>
                 <ul className="flex flex-wrap gap-2">
-                  {game.board.tray.map((piece) => (
-                    <li key={piece.id}>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          game.setSelectedTrayId(
-                            game.selectedTrayId === piece.id ? null : piece.id,
-                          )
-                        }
-                        aria-pressed={game.selectedTrayId === piece.id}
-                        className={cn(
-                          "inline-flex min-h-11 items-center gap-2 rounded-xl border px-4 text-sm font-medium transition-all duration-200",
-                          game.selectedTrayId === piece.id
-                            ? "border-primary bg-primary/15 text-foreground"
-                            : "border-border bg-surface-2 hover:border-primary/50",
-                        )}
-                      >
-                        {piece.kind === "filter" && (
-                          <span aria-hidden="true">{colorGlyph(piece.color ?? 7)}</span>
-                        )}
-                        {trayLabel(piece)}
-                      </button>
-                    </li>
-                  ))}
+                  <AnimatePresence initial={false}>
+                    {game.board.tray.map((piece) => {
+                      const active = game.selectedTrayId === piece.id;
+                      return (
+                        <motion.li
+                          key={piece.id}
+                          layout={!rm}
+                          initial={rm ? false : { opacity: 0, scale: 0.8 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.8 }}
+                          transition={{ type: "spring", stiffness: 420, damping: 28 }}
+                        >
+                          <button
+                            type="button"
+                            onClick={() =>
+                              game.setSelectedTrayId(active ? null : piece.id)
+                            }
+                            aria-pressed={active}
+                            className={cn(
+                              "inline-flex min-h-11 items-center gap-2 rounded-xl border px-4 text-sm font-medium transition-all duration-200 active:scale-95",
+                              active
+                                ? "border-primary bg-primary/15 text-foreground shadow-[0_0_0_3px_color-mix(in_oklab,var(--primary)_18%,transparent)]"
+                                : "border-border bg-surface-2 hover:-translate-y-0.5 hover:border-primary/50",
+                            )}
+                          >
+                            {piece.kind === "filter" && (
+                              <span aria-hidden="true">{colorGlyph(piece.color ?? 7)}</span>
+                            )}
+                            {trayLabel(piece)}
+                          </button>
+                        </motion.li>
+                      );
+                    })}
+                  </AnimatePresence>
                 </ul>
               </div>
             )}
-          </div>
+          </motion.div>
 
-          <aside className="space-y-3">
+          <motion.aside {...fade} className="space-y-3">
             <div className="flex flex-wrap gap-2">
               <button
                 type="button"
                 onClick={game.undo}
                 disabled={!game.canUndo}
-                className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-border bg-surface/70 px-4 text-sm transition-colors hover:bg-surface-2 disabled:opacity-40"
+                className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-border bg-surface/70 px-4 text-sm transition-all duration-200 hover:bg-surface-2 active:scale-95 disabled:opacity-40 disabled:active:scale-100"
               >
                 <Undo2 className="h-4 w-4" aria-hidden="true" /> Undo
               </button>
               <button
                 type="button"
-                onClick={() => {
-                  game.reset();
-                  setHintLevel(0);
-                  setCelebrated(false);
-                }}
-                className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-border bg-surface/70 px-4 text-sm transition-colors hover:bg-surface-2"
+                onClick={restart}
+                className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-border bg-surface/70 px-4 text-sm transition-all duration-200 hover:bg-surface-2 active:scale-95"
               >
                 <RotateCcw className="h-4 w-4" aria-hidden="true" /> Reset
               </button>
@@ -196,33 +318,47 @@ function LevelScreen({ levelId }: { levelId: string }) {
             <button
               type="button"
               onClick={() => setHintLevel((h) => Math.min(h + 1, 2))}
-              className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-accent/40 bg-accent/10 px-4 text-sm font-medium text-foreground transition-colors hover:bg-accent/20"
+              disabled={hintLevel >= 2}
+              className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-accent/40 bg-accent/10 px-4 text-sm font-medium transition-all duration-200 hover:bg-accent/20 active:scale-95 disabled:opacity-50"
             >
               <Lightbulb className="h-4 w-4 text-accent" aria-hidden="true" />
-              {hintLevel === 0 ? "Stuck? Get a nudge" : "Tell me more"}
+              {hintLevel === 0
+                ? "Stuck? Get a nudge"
+                : hintLevel === 1
+                  ? "Tell me more"
+                  : "That's every hint"}
             </button>
 
-            {hintLevel > 0 && (
-              <div
-                className="rounded-2xl border border-accent/30 bg-surface/70 p-4 text-sm backdrop-blur"
-                aria-live="polite"
-              >
-                <p className="font-display text-xs tracking-widest text-accent uppercase">
-                  Tutor
-                </p>
-                <p className="mt-2 text-muted-foreground">
-                  {hintLevel === 1
-                    ? "Read the targets first — each glyph tells you the exact colour it needs."
-                    : level.hint}
-                </p>
-              </div>
-            )}
+            <AnimatePresence initial={false}>
+              {hintLevel > 0 && (
+                <motion.div
+                  key={hintLevel}
+                  initial={rm ? false : { opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: rm ? 0 : 0.3, ease: "easeOut" }}
+                  className="overflow-hidden rounded-2xl border border-accent/30 bg-surface/70 text-sm backdrop-blur"
+                  aria-live="polite"
+                >
+                  <div className="p-4">
+                    <p className="font-display text-xs tracking-widest text-accent uppercase">
+                      Tutor
+                    </p>
+                    <p className="mt-2 text-muted-foreground">
+                      {hintLevel === 1
+                        ? "Read the targets first — each glyph tells you the exact colour it needs."
+                        : level.hint}
+                    </p>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             <button
               type="button"
               onClick={() => togglePref("colorblind")}
               aria-pressed={prefs.colorblind}
-              className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-border bg-surface/70 px-4 text-sm transition-colors hover:bg-surface-2"
+              className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-border bg-surface/70 px-4 text-sm transition-all duration-200 hover:bg-surface-2 active:scale-95"
             >
               <Eye className="h-4 w-4" aria-hidden="true" />
               Colourblind labels {prefs.colorblind ? "on" : "off"}
@@ -231,71 +367,184 @@ function LevelScreen({ levelId }: { levelId: string }) {
               type="button"
               onClick={() => togglePref("reduceMotion")}
               aria-pressed={prefs.reduceMotion}
-              className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-border bg-surface/70 px-4 text-sm transition-colors hover:bg-surface-2"
+              className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-border bg-surface/70 px-4 text-sm transition-all duration-200 hover:bg-surface-2 active:scale-95"
             >
               Reduced motion {prefs.reduceMotion ? "on" : "off"}
             </button>
-          </aside>
+
+            <p className="hidden pt-1 text-xs text-muted-foreground lg:block">
+              Shortcuts: <kbd>U</kbd> undo · <kbd>R</kbd> reset · <kbd>H</kbd> hint
+            </p>
+          </motion.aside>
         </div>
       </div>
 
-      {showTeach && level.teaches && (
-        <div className="fixed inset-x-0 bottom-0 z-20 px-4 pb-6">
-          <div className="mx-auto flex max-w-md items-center gap-3 rounded-2xl border border-primary/40 bg-surface p-4 shadow-lg backdrop-blur">
-            <p className="min-w-0 flex-1 text-sm">{level.teaches}</p>
-            <button
-              type="button"
-              onClick={() => setShowTeach(false)}
-              className="min-h-11 shrink-0 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground"
-            >
-              Got it
-            </button>
-          </div>
-        </div>
-      )}
-
-      {game.result.solved && (
-        <div className="fixed inset-0 z-30 grid place-items-center bg-background/80 px-6 backdrop-blur-sm">
-          <div className="w-full max-w-sm rounded-3xl border border-primary/40 bg-surface p-8 text-center" style={{ boxShadow: "var(--shadow-glow)" }}>
-            <p className="font-display text-xs tracking-[0.3em] text-primary uppercase">
-              Solved
-            </p>
-            <h2 className="mt-3 text-3xl font-extrabold">{level.name}</h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              {game.moves} {game.moves === 1 ? "move" : "moves"} · par {level.par}
-              {game.moves <= level.par ? " · perfect route" : ""}
-            </p>
-            <div className="mt-7 flex flex-col gap-2">
-              {next ? (
-                <button
-                  type="button"
-                  onClick={() => navigate({ to: "/play/$levelId", params: { levelId: next.id } })}
-                  className="min-h-11 rounded-full bg-primary px-6 font-semibold text-primary-foreground transition-transform hover:scale-[1.02]"
-                >
-                  Next puzzle: {next.name}
-                </button>
-              ) : (
-                <Link
-                  to="/play"
-                  className="min-h-11 rounded-full bg-primary px-6 py-3 font-semibold text-primary-foreground"
-                >
-                  You finished every puzzle
-                </Link>
-              )}
+      {/* Teaching card for new mechanics */}
+      <AnimatePresence>
+        {showTeach && level.teaches && !solved && (
+          <motion.div
+            initial={rm ? false : { opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 40 }}
+            transition={{ type: "spring", stiffness: 320, damping: 30 }}
+            className="fixed inset-x-0 bottom-0 z-20 px-4 pb-5"
+          >
+            <div className="mx-auto flex max-w-md items-center gap-3 rounded-2xl border border-primary/40 bg-surface p-4 shadow-lg backdrop-blur">
+              <p className="min-w-0 flex-1 text-sm">{level.teaches}</p>
               <button
                 type="button"
-                onClick={() => {
-                  game.reset();
-                  setCelebrated(false);
-                }}
-                className="min-h-11 rounded-full border border-border px-6 text-sm transition-colors hover:bg-surface-2"
+                onClick={() => setShowTeach(false)}
+                className="min-h-11 shrink-0 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground transition-transform active:scale-95"
               >
-                Replay for a better route
+                Got it
               </button>
             </div>
-          </div>
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Soft failure state: nobody loses, the game just offers a hand. */}
+      <AnimatePresence>
+        {game.struggling && !nudgeDismissed && hintLevel === 0 && !showTeach && (
+          <motion.div
+            initial={rm ? false : { opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 30 }}
+            transition={{ type: "spring", stiffness: 300, damping: 28 }}
+            className="fixed inset-x-0 bottom-0 z-20 px-4 pb-5"
+          >
+            <div className="mx-auto flex max-w-md items-center gap-3 rounded-2xl border border-accent/40 bg-surface p-4 shadow-lg backdrop-blur">
+              <Lightbulb className="h-5 w-5 shrink-0 text-accent" aria-hidden="true" />
+              <p className="min-w-0 flex-1 text-sm">
+                This one is a knot. Want a nudge from the tutor?
+              </p>
+              <div className="flex shrink-0 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setHintLevel(1)}
+                  className="min-h-11 rounded-xl bg-accent px-4 text-sm font-semibold text-accent-foreground transition-transform active:scale-95"
+                >
+                  Yes
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setNudgeDismissed(true)}
+                  className="min-h-11 rounded-xl border border-border px-3 text-sm transition-colors hover:bg-surface-2"
+                >
+                  No
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* End of level */}
+      <AnimatePresence>
+        {solved && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: rm ? 0 : 0.25 }}
+            className="fixed inset-0 z-30 grid place-items-center bg-background/80 px-6 backdrop-blur-sm"
+            role="dialog"
+            aria-modal="true"
+            aria-label={`${level.name} solved`}
+          >
+            <motion.div
+              initial={rm ? false : { opacity: 0, scale: 0.9, y: 18 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ type: "spring", stiffness: 320, damping: 26 }}
+              className="relative w-full max-w-sm overflow-hidden rounded-3xl border border-primary/40 bg-surface p-8 text-center"
+              style={{ boxShadow: "var(--shadow-glow)" }}
+            >
+              {!rm && (
+                <motion.div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -top-24 left-1/2 h-56 w-56 -translate-x-1/2 rounded-full"
+                  style={{
+                    background:
+                      "radial-gradient(circle, color-mix(in oklab, var(--primary) 45%, transparent), transparent 70%)",
+                  }}
+                  initial={{ scale: 0.4, opacity: 0 }}
+                  animate={{ scale: 1.4, opacity: [0, 0.9, 0.35] }}
+                  transition={{ duration: 1.1, ease: "easeOut" }}
+                />
+              )}
+              <p className="font-display text-xs tracking-[0.3em] text-primary uppercase">
+                {game.overPar ? "Solved" : "Perfect route"}
+              </p>
+              <h2 className="mt-3 text-3xl font-extrabold">{level.name}</h2>
+
+              <div className="mt-4 flex justify-center gap-1.5" aria-hidden="true">
+                {[0, 1, 2].map((i) => {
+                  const earned = game.moves <= level.par + i;
+                  return (
+                    <motion.span
+                      key={i}
+                      initial={rm ? false : { scale: 0, rotate: -40 }}
+                      animate={{ scale: 1, rotate: 0 }}
+                      transition={{ delay: rm ? 0 : 0.15 + i * 0.12, type: "spring", stiffness: 420, damping: 18 }}
+                      className={cn(
+                        "text-2xl",
+                        earned ? "text-primary text-glow" : "text-muted-foreground/30",
+                      )}
+                    >
+                      ★
+                    </motion.span>
+                  );
+                })}
+              </div>
+
+              <p className="mt-3 text-sm text-muted-foreground">
+                {game.moves} {game.moves === 1 ? "move" : "moves"} · par {level.par}
+                {game.overPar
+                  ? ` · ${game.moves - level.par} over — there is a tighter line`
+                  : " · nothing wasted"}
+              </p>
+
+              <div className="mt-7 flex flex-col gap-2">
+                {next ? (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      navigate({ to: "/play/$levelId", params: { levelId: next.id } })
+                    }
+                    className={cn(
+                      "min-h-11 rounded-full bg-primary px-6 font-semibold text-primary-foreground transition-transform duration-200 hover:scale-[1.02] active:scale-95",
+                      !rm && "sheen",
+                    )}
+                  >
+                    Next puzzle: {next.name}
+                  </button>
+                ) : (
+                  <Link
+                    to="/play"
+                    className="min-h-11 rounded-full bg-primary px-6 py-3 font-semibold text-primary-foreground"
+                  >
+                    You finished every puzzle
+                  </Link>
+                )}
+                <button
+                  type="button"
+                  onClick={restart}
+                  className="min-h-11 rounded-full border border-border px-6 text-sm transition-colors hover:bg-surface-2"
+                >
+                  {game.overPar ? "Retry for par" : "Replay this puzzle"}
+                </button>
+                <Link
+                  to="/play"
+                  className="min-h-11 text-sm text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  Back to all puzzles
+                </Link>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </main>
   );
 }

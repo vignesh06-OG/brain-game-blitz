@@ -153,6 +153,18 @@
     outline: 2px solid var(--ring);
     outline-offset: 2px;
   }
+
+  kbd {
+    display: inline-block;
+    min-width: 1.4em;
+    padding: 0.05em 0.4em;
+    border: 1px solid var(--border);
+    border-radius: 0.4em;
+    background-color: var(--surface-2);
+    font-family: inherit;
+    font-size: 0.9em;
+    text-align: center;
+  }
 }
 
 @utility aurora {
@@ -194,12 +206,79 @@
   }
 }
 
+@keyframes drop-hint {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes shake-x {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-5px);
+  }
+  40% {
+    transform: translateX(5px);
+  }
+  60% {
+    transform: translateX(-3px);
+  }
+  80% {
+    transform: translateX(3px);
+  }
+}
+
+@keyframes sheen {
+  0% {
+    background-position: -140% 0;
+  }
+  100% {
+    background-position: 240% 0;
+  }
+}
+
 @utility animate-float-slow {
   animation: float-slow 6s ease-in-out infinite;
 }
 
 @utility animate-pulse-ring {
   animation: pulse-ring 2s ease-out infinite;
+}
+
+@utility animate-drop-hint {
+  animation: drop-hint 1.8s ease-in-out infinite;
+}
+
+@utility animate-shake {
+  animation: shake-x 0.45s ease-in-out;
+}
+
+/* Sweeping highlight used on the primary call-to-action buttons. */
+@utility sheen {
+  position: relative;
+  overflow: hidden;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      100deg,
+      transparent 35%,
+      oklch(1 0 0 / 0.35) 50%,
+      transparent 65%
+    );
+    background-size: 220% 100%;
+    animation: sheen 3.4s ease-in-out infinite;
+    pointer-events: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

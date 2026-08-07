@@ -1,34 +1,72 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { cloneBoard, trace } from "./engine";
-import type { Board, Level, Piece } from "./types";
+import type { Board, ColorMask, Level, Piece, TraceResult } from "./types";
 import { key } from "./types";
 
 export interface GameState {
   board: Board;
   moves: number;
-  result: ReturnType<typeof trace>;
+  result: TraceResult;
+  /** Target cells lit with exactly the colour they asked for. */
+  litKeys: string[];
+  /** Target cells receiving light, but the wrong mix — the soft failure state. */
+  misroutedKeys: string[];
+  /** Cell key touched by the most recent move, for pop/rotate feedback. */
+  lastTouched: string | null;
+  /** Player is over par or has stalled — used to surface help, never to punish. */
+  struggling: boolean;
+  overPar: boolean;
   selectedTrayId: string | null;
   setSelectedTrayId: (id: string | null) => void;
   activate: (x: number, y: number) => void;
-  pickUp: (x: number, y: number) => void;
   reset: () => void;
   undo: () => void;
   canUndo: boolean;
 }
 
 const ROTATABLE = new Set(["mirror", "splitter"]);
+const HISTORY_LIMIT = 60;
+const STALL_MS = 35_000;
 
 export function useGame(level: Level): GameState {
   const [board, setBoard] = useState<Board>(() => cloneBoard(level.board));
   const [history, setHistory] = useState<Board[]>([]);
   const [moves, setMoves] = useState(0);
   const [selectedTrayId, setSelectedTrayId] = useState<string | null>(null);
+  const [lastTouched, setLastTouched] = useState<string | null>(null);
+  const [stalled, setStalled] = useState(false);
+  const lastMoveAt = useRef(Date.now());
 
   const result = useMemo(() => trace(board), [board]);
 
-  const commit = useCallback((next: Board) => {
+  const { litKeys, misroutedKeys } = useMemo(() => {
+    const lit: string[] = [];
+    const wrong: string[] = [];
+    for (const [k, piece] of Object.entries(board.cells)) {
+      if (piece.kind !== "target") continue;
+      const got: ColorMask = result.hits[k] ?? 0;
+      const want: ColorMask = piece.color ?? 7;
+      if (got === want) lit.push(k);
+      else if (got !== 0) wrong.push(k);
+    }
+    return { litKeys: lit, misroutedKeys: wrong };
+  }, [board, result]);
+
+  // Stall detection: no move for a while and the puzzle is still open.
+  useEffect(() => {
+    if (result.solved) return;
+    setStalled(false);
+    const timer = window.setInterval(() => {
+      if (Date.now() - lastMoveAt.current > STALL_MS) setStalled(true);
+    }, 2_000);
+    return () => window.clearInterval(timer);
+  }, [moves, result.solved]);
+
+  const commit = useCallback((next: Board, touched: string) => {
+    lastMoveAt.current = Date.now();
+    setLastTouched(touched);
     setBoard((prev) => {
-      setHistory((h) => [...h.slice(-40), prev]);
+      setHistory((h) => [...h.slice(-HISTORY_LIMIT), prev]);
       return next;
     });
     setMoves((m) => m + 1);
@@ -47,7 +85,7 @@ export function useGame(level: Level): GameState {
         const [taken] = next.tray.splice(idx, 1);
         next.cells[k] = taken!;
         setSelectedTrayId(null);
-        commit(next);
+        commit(next, k);
         return;
       }
 
@@ -55,39 +93,30 @@ export function useGame(level: Level): GameState {
 
       if (ROTATABLE.has(piece.kind)) {
         next.cells[k] = { ...piece, rot: (piece.rot + 1) % 2 };
-        commit(next);
+        commit(next, k);
         return;
       }
 
-      // Non-rotatable placed piece: return it to the tray.
+      // Non-rotatable placed piece: pick it back up into the tray.
       delete next.cells[k];
       next.tray.push(piece);
-      commit(next);
+      commit(next, k);
     },
     [board, commit, selectedTrayId],
   );
 
-  const pickUp = useCallback(
-    (x: number, y: number) => {
-      const k = key(x, y);
-      const piece = board.cells[k];
-      if (!piece || piece.fixed) return;
-      const next = cloneBoard(board);
-      delete next.cells[k];
-      next.tray.push(piece);
-      commit(next);
-    },
-    [board, commit],
-  );
-
   const reset = useCallback(() => {
+    lastMoveAt.current = Date.now();
     setBoard(cloneBoard(level.board));
     setHistory([]);
     setMoves(0);
     setSelectedTrayId(null);
+    setLastTouched(null);
+    setStalled(false);
   }, [level]);
 
   const undo = useCallback(() => {
+    lastMoveAt.current = Date.now();
     setHistory((h) => {
       if (!h.length) return h;
       const prev = h[h.length - 1]!;
@@ -95,16 +124,21 @@ export function useGame(level: Level): GameState {
       setMoves((m) => Math.max(0, m - 1));
       return h.slice(0, -1);
     });
+    setLastTouched(null);
   }, []);
 
   return {
     board,
     moves,
     result,
+    litKeys,
+    misroutedKeys,
+    lastTouched,
+    struggling: !result.solved && (stalled || moves > level.par * 2 + 1),
+    overPar: moves > level.par,
     selectedTrayId,
     setSelectedTrayId,
     activate,
-    pickUp,
     reset,
     undo,
     canUndo: history.length > 0,
