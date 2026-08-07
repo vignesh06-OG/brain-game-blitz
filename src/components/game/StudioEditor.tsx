@@ -34,6 +34,10 @@ const TOOLS: { kind: PieceKind; label: string; hint: string }[] = [
   { kind: "prism", label: "Prism", hint: "Separates white light into R/G/B." },
   { kind: "filter", label: "Filter", hint: "Only lets its own channels through." },
   { kind: "wall", label: "Wall", hint: "Blocks everything." },
+  { kind: "glass", label: "Glass", hint: "Passes light through, dimming it slightly." },
+  { kind: "crystal", label: "Crystal", hint: "Passes light and sheds rainbow caustics." },
+  { kind: "water", label: "Water", hint: "Absorbs red, tinting the beam cyan." },
+  { kind: "fog", label: "Fog", hint: "Scatters light sideways and halves its energy." },
 ];
 
 const COLORS: ColorMask[] = [1, 2, 4, 3, 5, 6, 7];
