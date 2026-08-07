@@ -298,3 +298,52 @@
   animation-iteration-count: 1 !important;
   transition-duration: 0.001ms !important;
 }
+
+/* Accessibility: high contrast + reduced motion (global, opt-in via prefs) */
+.high-contrast {
+  --background: oklch(0.08 0.02 275);
+  --foreground: oklch(1 0 0);
+  --muted-foreground: oklch(0.86 0.02 275);
+  --border: oklch(0.72 0.03 275);
+  --surface: oklch(0.16 0.03 275);
+  --surface-2: oklch(0.22 0.03 275);
+}
+.high-contrast :focus-visible {
+  outline: 3px solid var(--foreground);
+  outline-offset: 2px;
+}
+
+.reduce-motion,
+.reduce-motion * {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+@keyframes emitter-pulse {
+  0%,
+  100% {
+    opacity: 0.75;
+    transform: scale(0.94);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+}
+.emitter-core {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: emitter-pulse 2.6s ease-in-out infinite;
+}

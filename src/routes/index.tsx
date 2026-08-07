@@ -126,6 +126,18 @@ function Landing() {
             />
           </Link>
           <Link
+            to="/studio"
+            className="inline-flex min-h-11 items-center rounded-full border border-primary/45 bg-primary/10 px-6 text-sm font-medium backdrop-blur transition-all duration-200 hover:-translate-y-0.5 hover:bg-primary/20"
+          >
+            Open Prism Studio
+          </Link>
+          <Link
+            to="/sandbox"
+            className="inline-flex min-h-11 items-center rounded-full border border-border bg-surface/60 px-6 text-sm font-medium backdrop-blur transition-all duration-200 hover:-translate-y-0.5 hover:bg-surface-2"
+          >
+            Light sandbox
+          </Link>
+          <Link
             to="/play/$levelId"
             params={{ levelId: LEVELS[LEVELS.length - 1]!.id }}
             className="inline-flex min-h-11 items-center rounded-full border border-border bg-surface/60 px-6 text-sm font-medium backdrop-blur transition-all duration-200 hover:-translate-y-0.5 hover:bg-surface-2"

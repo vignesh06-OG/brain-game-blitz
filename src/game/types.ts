@@ -49,13 +49,31 @@ export interface Level {
   board: Board;
 }
 
+/** Live telemetry for a single beam edge — powers the beam inspector. */
+export interface SegmentMeta {
+  /** Cell keys of every emitter whose light reaches this edge. */
+  sources: string[];
+  /** Shortest hop count from an emitter to this edge. */
+  distance: number;
+  /** Reflections the light took to get here (mirrors + splitters). */
+  reflections: number;
+  /** Splits (splitters / prisms) the light passed through. */
+  splits: number;
+  /** Relative intensity, 1 = untouched emitter output. */
+  intensity: number;
+  /** Directions of travel across this edge, as a Dir bitmask. */
+  dirs: number;
+}
+
 export interface Segment {
   x1: number;
   y1: number;
   x2: number;
   y2: number;
   color: ColorMask;
+  meta?: SegmentMeta;
 }
+
 
 export interface TraceResult {
   segments: Segment[];
