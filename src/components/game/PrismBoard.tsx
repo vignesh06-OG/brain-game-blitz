@@ -378,21 +378,21 @@ export const PrismBoard = memo(function PrismBoard({
             const x = Number(parts[0]);
             const y = Number(parts[1]);
             return (
-              <motion.g
-                key={piece.id}
-                transform={`translate(${center(x)} ${center(y)})`}
-                initial={{ opacity: 0, scale: 0.55 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.55 }}
-                transition={reduceMotion ? { duration: 0 } : spring}
-                style={{ transformOrigin: "center", transformBox: "fill-box" }}
-              >
-                <PieceShape
-                  piece={piece}
-                  state={stateOf(k)}
-                  reduceMotion={reduceMotion}
-                />
-              </motion.g>
+              <g key={piece.id} transform={`translate(${center(x)} ${center(y)})`}>
+                <motion.g
+                  initial={{ opacity: 0, scale: 0.55 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.55 }}
+                  transition={reduceMotion ? { duration: 0 } : spring}
+                  style={{ transformOrigin: "center", transformBox: "fill-box" }}
+                >
+                  <PieceShape
+                    piece={piece}
+                    state={stateOf(k)}
+                    reduceMotion={reduceMotion}
+                  />
+                </motion.g>
+              </g>
             );
           })}
         </AnimatePresence>
