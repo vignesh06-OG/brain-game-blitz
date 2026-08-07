@@ -65,16 +65,13 @@ function PieceShape({
             stroke={color}
             strokeWidth={3}
           />
-          <motion.circle
+          <circle
             cx={0}
             cy={0}
             r={13}
             fill={color}
             filter="url(#glow)"
-            animate={
-              reduceMotion ? { opacity: 1, scale: 1 } : { opacity: [0.75, 1, 0.75], scale: [0.92, 1.08, 0.92] }
-            }
-            transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut" }}
+            className={reduceMotion ? undefined : "emitter-core"}
           />
           <g transform={`rotate(${piece.rot * 90})`}>
             <path d="M 0 -36 L 10 -16 L -10 -16 Z" fill={color} />
