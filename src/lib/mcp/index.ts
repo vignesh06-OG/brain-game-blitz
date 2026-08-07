@@ -16,5 +16,8 @@ export default defineMcp({
     issuer: `https://${projectRef}.supabase.co/auth/v1`,
     acceptedAudiences: "authenticated",
   }),
-  tools: [listLevels, getLevel, analyzePuzzle, generatePuzzle],
+  // Cast: the tools declare no outputSchema, which exactOptionalPropertyTypes
+  // treats as an incompatible `undefined` property.
+  tools: [listLevels, getLevel, analyzePuzzle, generatePuzzle] as never[],
+
 });
