@@ -51,6 +51,12 @@ function LevelSelect() {
 
         <div className="mt-4 flex flex-wrap gap-2">
           <Link
+            to="/intelligence"
+            className="inline-flex min-h-11 items-center rounded-full border border-primary/50 bg-primary/12 px-5 text-sm font-medium transition-all duration-200 hover:-translate-y-0.5 hover:bg-primary/20"
+          >
+            Light Intelligence Lab
+          </Link>
+          <Link
             to="/lab"
             className="inline-flex min-h-11 items-center rounded-full border border-accent/40 bg-accent/10 px-5 text-sm font-medium transition-all duration-200 hover:-translate-y-0.5 hover:bg-accent/20"
           >
