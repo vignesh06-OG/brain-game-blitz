@@ -1,8 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { motion } from "motion/react";
 import { ArrowLeft, Check, Lock } from "lucide-react";
 import { useEffect, useState } from "react";
 import { CHAPTERS, LEVELS } from "@/game/levels";
 import { loadProgress } from "@/game/progress";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/play/")({
   head: () => ({
