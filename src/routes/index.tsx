@@ -44,32 +44,67 @@ function Landing() {
           </filter>
         </defs>
         {beams.map((b, i) => (
-          <g key={i}>
-            <path d={b.d} stroke={b.c} strokeWidth={14} fill="none" filter="url(#heroGlow)" opacity={0.5} />
-            <path d={b.d} stroke={b.c} strokeWidth={2} fill="none" opacity={0.9} />
-          </g>
+          <motion.g
+            key={i}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.15 + i * 0.18, duration: 0.6 }}
+          >
+            <motion.path
+              d={b.d}
+              stroke={b.c}
+              strokeWidth={14}
+              fill="none"
+              filter="url(#heroGlow)"
+              opacity={0.5}
+              initial={{ pathLength: 0 }}
+              animate={{ pathLength: 1 }}
+              transition={{ delay: 0.15 + i * 0.18, duration: 1.4, ease: "easeOut" }}
+            />
+            <motion.path
+              d={b.d}
+              stroke={b.c}
+              strokeWidth={2}
+              fill="none"
+              opacity={0.9}
+              initial={{ pathLength: 0 }}
+              animate={{ pathLength: 1 }}
+              transition={{ delay: 0.15 + i * 0.18, duration: 1.4, ease: "easeOut" }}
+            />
+          </motion.g>
         ))}
       </svg>
 
-      <div className="relative mx-auto flex min-h-dvh max-w-5xl flex-col justify-center px-6 py-20">
-        <p className="inline-flex w-fit items-center gap-2 rounded-full border border-border bg-surface/70 px-4 py-1.5 text-xs font-medium tracking-widest text-muted-foreground uppercase backdrop-blur">
+      <motion.div
+        className="relative mx-auto flex min-h-dvh max-w-5xl flex-col justify-center px-6 py-20"
+        initial="hidden"
+        animate="show"
+        variants={{ show: { transition: { staggerChildren: 0.09, delayChildren: 0.1 } } }}
+      >
+        <motion.p
+          variants={rise}
+          className="inline-flex w-fit items-center gap-2 rounded-full border border-border bg-surface/70 px-4 py-1.5 text-xs font-medium tracking-widest text-muted-foreground uppercase backdrop-blur"
+        >
           <Sparkle className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
           Puzzle Masters Hackathon 2026
-        </p>
+        </motion.p>
 
-        <h1 className="mt-8 text-6xl leading-[0.95] font-extrabold sm:text-8xl">
+        <motion.h1
+          variants={rise}
+          className="mt-8 text-6xl leading-[0.95] font-extrabold sm:text-8xl"
+        >
           Light is the
           <br />
           <span className="text-primary text-glow">only</span> mechanic.
-        </h1>
+        </motion.h1>
 
-        <p className="mt-6 max-w-xl text-lg text-muted-foreground">
+        <motion.p variants={rise} className="mt-6 max-w-xl text-lg text-muted-foreground">
           Prism is a logic puzzle about routing beams. Turn mirrors, split rays, strip
           colour with filters and shatter white light through a prism until every target
           burns the exact shade it asks for.
-        </p>
+        </motion.p>
 
-        <div className="mt-10 flex flex-wrap items-center gap-3">
+        <motion.div variants={rise} className="mt-10 flex flex-wrap items-center gap-3">
           <Link
             to="/play"
             className="group inline-flex min-h-11 items-center gap-2 rounded-full bg-primary px-7 text-base font-semibold text-primary-foreground transition-transform duration-200 hover:scale-[1.03] active:scale-95"
@@ -84,25 +119,28 @@ function Landing() {
           <Link
             to="/play/$levelId"
             params={{ levelId: LEVELS[LEVELS.length - 1]!.id }}
-            className="inline-flex min-h-11 items-center rounded-full border border-border bg-surface/60 px-6 text-sm font-medium backdrop-blur transition-colors hover:bg-surface-2"
+            className="inline-flex min-h-11 items-center rounded-full border border-border bg-surface/60 px-6 text-sm font-medium backdrop-blur transition-all duration-200 hover:-translate-y-0.5 hover:bg-surface-2"
           >
             Jump to the hardest one
           </Link>
-        </div>
+        </motion.div>
 
         <ul className="mt-20 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {CHAPTERS.map((c) => (
-            <li
+            <motion.li
               key={c.n}
+              variants={rise}
+              whileHover={{ y: -4 }}
+              transition={{ type: "spring", stiffness: 320, damping: 24 }}
               className="rounded-2xl border border-border bg-surface/60 p-5 backdrop-blur"
             >
               <p className="font-display text-sm text-primary">Chapter {c.n}</p>
               <p className="mt-1 font-display text-lg font-bold">{c.name}</p>
               <p className="mt-2 text-sm text-muted-foreground">{c.blurb}</p>
-            </li>
+            </motion.li>
           ))}
         </ul>
-      </div>
+      </motion.div>
     </main>
   );
 }
