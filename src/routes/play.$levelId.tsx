@@ -158,7 +158,9 @@ function LevelScreen({ levelId }: { levelId: string }) {
                             : "border-border bg-surface-2 hover:border-primary/50",
                         )}
                       >
-                        <span aria-hidden="true">{colorGlyph(piece.color ?? 7)}</span>
+                        {piece.kind === "filter" && (
+                          <span aria-hidden="true">{colorGlyph(piece.color ?? 7)}</span>
+                        )}
                         {trayLabel(piece)}
                       </button>
                     </li>
