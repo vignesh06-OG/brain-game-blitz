@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { motion } from "motion/react";
 import { ArrowRight, Sparkle } from "lucide-react";
 import { CHAPTERS, LEVELS } from "@/game/levels";
 
