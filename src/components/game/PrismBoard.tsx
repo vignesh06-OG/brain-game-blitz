@@ -430,7 +430,9 @@ export const PrismBoard = memo(function PrismBoard({
           const k = key(x, y);
           const piece = board.cells[k];
           const state = stateOf(k);
-          const interactive = (!piece && placing) || (!!piece && !piece.fixed);
+          const interactive =
+            !readOnly &&
+            (interactiveAll || (!piece && placing) || (!!piece && !piece.fixed));
           return (
             <button
               key={k}
