@@ -9,6 +9,7 @@ import {
   ShieldCheck,
   Trash2,
   Undo2,
+  Sparkles,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { BeamInspector } from "@/components/game/BeamInspector";
