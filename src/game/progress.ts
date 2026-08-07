@@ -68,9 +68,14 @@ export function recordSolve(levelId: string, moves: number): Progress {
 export interface Prefs {
   colorblind: boolean;
   reduceMotion: boolean;
+  highContrast: boolean;
 }
 
-const DEFAULT_PREFS: Prefs = { colorblind: false, reduceMotion: false };
+const DEFAULT_PREFS: Prefs = {
+  colorblind: false,
+  reduceMotion: false,
+  highContrast: false,
+};
 
 export function loadPrefs(): Prefs {
   if (typeof window === "undefined") return { ...DEFAULT_PREFS };
@@ -79,6 +84,7 @@ export function loadPrefs(): Prefs {
   return {
     colorblind: parsed["colorblind"] === true,
     reduceMotion: parsed["reduceMotion"] === true,
+    highContrast: parsed["highContrast"] === true,
   };
 }
 
@@ -89,9 +95,11 @@ export function savePrefs(prefs: Prefs) {
       JSON.stringify({
         colorblind: prefs.colorblind === true,
         reduceMotion: prefs.reduceMotion === true,
+        highContrast: prefs.highContrast === true,
       }),
     );
   } catch {
     /* storage unavailable */
   }
 }
+

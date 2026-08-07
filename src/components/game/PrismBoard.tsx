@@ -21,6 +21,18 @@ interface Props {
   misroutedKeys?: string[];
   lastTouched?: string | null;
   hintCell?: string | null;
+  /** Editor/sandbox: every cell is clickable, not just placeable ones. */
+  interactiveAll?: boolean;
+  /** Replay: no interaction at all. */
+  readOnly?: boolean;
+  /** Cell highlighted by the editor selection. */
+  selectedCell?: string | null;
+  /** Secondary action (right click / long press) on a cell. */
+  onSecondary?: (x: number, y: number) => void;
+  /** Fires as the pointer or keyboard focus moves across cells. */
+  onInspectCell?: (cellKey: string | null) => void;
+  /** Editor: allow pieces (and palette tools) to be dragged between cells. */
+  onDropCell?: (from: string, to: string) => void;
 }
 
 const spring = { type: "spring" as const, stiffness: 420, damping: 26, mass: 0.7 };
@@ -274,6 +286,12 @@ export const PrismBoard = memo(function PrismBoard({
   misroutedKeys = [],
   lastTouched,
   hintCell,
+  interactiveAll = false,
+  readOnly = false,
+  selectedCell = null,
+  onSecondary,
+  onInspectCell,
+  onDropCell,
 }: Props) {
   const w = board.width * C;
   const h = board.height * C;
@@ -418,6 +436,34 @@ export const PrismBoard = memo(function PrismBoard({
               key={k}
               type="button"
               onClick={() => onActivate(x, y)}
+              onContextMenu={
+                onSecondary
+                  ? (e) => {
+                      e.preventDefault();
+                      onSecondary(x, y);
+                    }
+                  : undefined
+              }
+              draggable={!!onDropCell && !!piece && !piece.fixed}
+              onDragStart={
+                onDropCell
+                  ? (e) => e.dataTransfer.setData("text/prism-cell", k)
+                  : undefined
+              }
+              onDragOver={onDropCell ? (e) => e.preventDefault() : undefined}
+              onDrop={
+                onDropCell
+                  ? (e) => {
+                      e.preventDefault();
+                      const from = e.dataTransfer.getData("text/prism-cell");
+                      if (from) onDropCell(from, k);
+                    }
+                  : undefined
+              }
+              onPointerEnter={onInspectCell ? () => onInspectCell(k) : undefined}
+              onPointerLeave={onInspectCell ? () => onInspectCell(null) : undefined}
+              onFocus={onInspectCell ? () => onInspectCell(k) : undefined}
+              onBlur={onInspectCell ? () => onInspectCell(null) : undefined}
               disabled={!interactive}
               aria-label={`Column ${x + 1}, row ${y + 1}: ${describe(piece, state)}`}
               className={cn(
@@ -427,6 +473,7 @@ export const PrismBoard = memo(function PrismBoard({
                   : "cursor-default",
                 !piece && placing && "bg-primary/5 ring-1 ring-primary/25 animate-drop-hint",
                 lastTouched === k && "ring-2 ring-primary/60",
+                selectedCell === k && "ring-2 ring-accent",
                 state === "misrouted" && "ring-2 ring-destructive/50",
                 hintCell === k && "ring-2 ring-accent animate-pulse-ring",
               )}

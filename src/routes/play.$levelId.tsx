@@ -78,7 +78,7 @@ function LevelScreen({ levelId }: { levelId: string }) {
   const navigate = useNavigate();
   const game = useGame(level);
   const [hintLevel, setHintLevel] = useState(0);
-  const [prefs, setPrefs] = useState({ colorblind: false, reduceMotion: false });
+  const [prefs, setPrefs] = useState({ colorblind: false, reduceMotion: false, highContrast: false });
   const [showTeach, setShowTeach] = useState(!!level.teaches);
   const [celebrated, setCelebrated] = useState(false);
   const [nudgeDismissed, setNudgeDismissed] = useState(false);

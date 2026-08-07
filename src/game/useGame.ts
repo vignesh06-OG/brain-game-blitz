@@ -16,6 +16,8 @@ export interface GameState {
   /** Player is over par or has stalled — used to surface help, never to punish. */
   struggling: boolean;
   overPar: boolean;
+  /** Every board state the player has passed through, for replay. */
+  timeline: Board[];
   selectedTrayId: string | null;
   setSelectedTrayId: (id: string | null) => void;
   activate: (x: number, y: number) => void;
@@ -31,6 +33,7 @@ const STALL_MS = 35_000;
 export function useGame(level: Level): GameState {
   const [board, setBoard] = useState<Board>(() => cloneBoard(level.board));
   const [history, setHistory] = useState<Board[]>([]);
+  const [timeline, setTimeline] = useState<Board[]>(() => [cloneBoard(level.board)]);
   const [moves, setMoves] = useState(0);
   const [selectedTrayId, setSelectedTrayId] = useState<string | null>(null);
   const [lastTouched, setLastTouched] = useState<string | null>(null);
@@ -69,6 +72,7 @@ export function useGame(level: Level): GameState {
       setHistory((h) => [...h.slice(-HISTORY_LIMIT), prev]);
       return next;
     });
+    setTimeline((t) => [...t.slice(-HISTORY_LIMIT), cloneBoard(next)]);
     setMoves((m) => m + 1);
   }, []);
 
@@ -109,6 +113,7 @@ export function useGame(level: Level): GameState {
     lastMoveAt.current = Date.now();
     setBoard(cloneBoard(level.board));
     setHistory([]);
+    setTimeline([cloneBoard(level.board)]);
     setMoves(0);
     setSelectedTrayId(null);
     setLastTouched(null);
@@ -122,6 +127,7 @@ export function useGame(level: Level): GameState {
       const prev = h[h.length - 1]!;
       setBoard(prev);
       setMoves((m) => Math.max(0, m - 1));
+      setTimeline((t) => (t.length > 1 ? t.slice(0, -1) : t));
       return h.slice(0, -1);
     });
     setLastTouched(null);
@@ -136,6 +142,7 @@ export function useGame(level: Level): GameState {
     lastTouched,
     struggling: !result.solved && (stalled || moves > level.par * 2 + 1),
     overPar: moves > level.par,
+    timeline,
     selectedTrayId,
     setSelectedTrayId,
     activate,

@@ -6,6 +6,7 @@ import {
   type Dir,
   type Piece,
   type Segment,
+  type SegmentMeta,
   type TraceResult,
 } from "./types";
 
@@ -20,13 +21,36 @@ interface Ray {
   y: number;
   dir: Dir;
   color: ColorMask;
+  /** Telemetry carried along the ray so every edge knows its history. */
+  src: string;
+  dist: number;
+  refl: number;
+  splits: number;
 }
 
 const MAX_STEPS = 4000;
 
+const newMeta = (ray: Ray): SegmentMeta => ({
+  sources: [ray.src],
+  distance: ray.dist,
+  reflections: ray.refl,
+  splits: ray.splits,
+  intensity: 1 / 2 ** Math.min(ray.splits, 10),
+  dirs: 1 << ray.dir,
+});
+
+const mergeMeta = (a: SegmentMeta, b: SegmentMeta): SegmentMeta => ({
+  sources: a.sources.includes(b.sources[0]!) ? a.sources : [...a.sources, ...b.sources],
+  distance: Math.min(a.distance, b.distance),
+  reflections: Math.max(a.reflections, b.reflections),
+  splits: Math.max(a.splits, b.splits),
+  intensity: Math.min(1, a.intensity + b.intensity),
+  dirs: a.dirs | b.dirs,
+});
+
 /**
  * Pure beam tracer: (board) => beams. Deterministic, used by the renderer,
- * the level validator and the daily puzzle generator alike.
+ * the puzzle validator, the studio editor and the sandbox alike.
  */
 export function trace(board: Board): TraceResult {
   const segments: Segment[] = [];
@@ -42,6 +66,10 @@ export function trace(board: Board): TraceResult {
         y: Number(parts[1]),
         dir: (piece.rot % 4) as Dir,
         color: piece.color ?? 7,
+        src: k,
+        dist: 0,
+        refl: 0,
+        splits: 0,
       });
     }
   }
@@ -61,11 +89,19 @@ export function trace(board: Board): TraceResult {
     const ny = ray.y + dy;
     if (nx < 0 || ny < 0 || nx >= board.width || ny >= board.height) continue;
 
-    segments.push({ x1: ray.x, y1: ray.y, x2: nx, y2: ny, color: ray.color });
+    const next = { ...ray, x: nx, y: ny, dist: ray.dist + 1 };
+    segments.push({
+      x1: ray.x,
+      y1: ray.y,
+      x2: nx,
+      y2: ny,
+      color: ray.color,
+      meta: newMeta(next),
+    });
 
     const piece: Piece | undefined = board.cells[key(nx, ny)];
     if (!piece) {
-      queue.push({ x: nx, y: ny, dir: ray.dir, color: ray.color });
+      queue.push(next);
       continue;
     }
 
@@ -79,25 +115,47 @@ export function trace(board: Board): TraceResult {
         break;
       }
       case "mirror":
-        queue.push({ x: nx, y: ny, dir: reflect(ray.dir, piece.rot), color: ray.color });
+        queue.push({
+          ...next,
+          dir: reflect(ray.dir, piece.rot),
+          refl: ray.refl + 1,
+        });
         break;
       case "splitter":
-        queue.push({ x: nx, y: ny, dir: ray.dir, color: ray.color });
-        queue.push({ x: nx, y: ny, dir: reflect(ray.dir, piece.rot), color: ray.color });
+        queue.push({ ...next, splits: ray.splits + 1 });
+        queue.push({
+          ...next,
+          dir: reflect(ray.dir, piece.rot),
+          refl: ray.refl + 1,
+          splits: ray.splits + 1,
+        });
         break;
       case "filter": {
         const passed = ray.color & (piece.color ?? 7);
-        if (passed) queue.push({ x: nx, y: ny, dir: ray.dir, color: passed });
+        if (passed) queue.push({ ...next, color: passed });
         break;
       }
       case "prism": {
         // Splits a beam into its components: red goes straight,
         // green reflects one way, blue the other.
-        if (ray.color & 1) queue.push({ x: nx, y: ny, dir: ray.dir, color: 1 });
+        if (ray.color & 1)
+          queue.push({ ...next, color: 1, splits: ray.splits + 1 });
         if (ray.color & 2)
-          queue.push({ x: nx, y: ny, dir: reflect(ray.dir, 0), color: 2 });
+          queue.push({
+            ...next,
+            color: 2,
+            dir: reflect(ray.dir, 0),
+            refl: ray.refl + 1,
+            splits: ray.splits + 1,
+          });
         if (ray.color & 4)
-          queue.push({ x: nx, y: ny, dir: reflect(ray.dir, 1), color: 4 });
+          queue.push({
+            ...next,
+            color: 4,
+            dir: reflect(ray.dir, 1),
+            refl: ray.refl + 1,
+            splits: ray.splits + 1,
+          });
         break;
       }
     }
@@ -110,8 +168,15 @@ export function trace(board: Board): TraceResult {
     const b = `${s.x2},${s.y2}`;
     const k = a < b ? `${a}|${b}` : `${b}|${a}`;
     const existing = merged.get(k);
-    if (existing) existing.color |= s.color;
-    else merged.set(k, { ...s });
+    if (existing) {
+      existing.color |= s.color;
+      if (existing.meta && s.meta) existing.meta = mergeMeta(existing.meta, s.meta);
+    } else {
+      const copy: Segment = { x1: s.x1, y1: s.y1, x2: s.x2, y2: s.y2, color: s.color };
+      if (s.meta) copy.meta = { ...s.meta };
+      merged.set(k, copy);
+    }
+
   }
 
   let targetCount = 0;
@@ -160,6 +225,12 @@ export const colorName = (mask: ColorMask): string =>
 /** Distinct glyph per colour so the game is playable without colour vision. */
 export const colorGlyph = (mask: ColorMask): string =>
   ({ 1: "▲", 2: "■", 4: "●", 3: "◆", 5: "✦", 6: "⬢", 7: "★" })[mask & 7] ?? "·";
+
+export const DIR_NAME = ["north", "east", "south", "west"] as const;
+
+/** Human-readable list of travel directions from a Dir bitmask. */
+export const dirNames = (mask: number): string =>
+  DIR_NAME.filter((_, i) => mask & (1 << i)).join(" + ") || "—";
 
 export const cloneBoard = (board: Board): Board => ({
   width: board.width,
