@@ -2,6 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import { ArrowLeft, Check, Lock } from "lucide-react";
 import { useEffect, useState } from "react";
+import { AchievementsPanel } from "@/components/game/AchievementsPanel";
+import { loadUnlocked } from "@/game/achievements";
 import { CHAPTERS, LEVELS } from "@/game/levels";
 import { loadProgress } from "@/game/progress";
 import { cn } from "@/lib/utils";
@@ -27,7 +29,11 @@ export const Route = createFileRoute("/play/")({
 
 function LevelSelect() {
   const [progress, setProgress] = useState<Record<string, number>>({});
-  useEffect(() => setProgress(loadProgress()), []);
+  const [unlocked, setUnlocked] = useState<string[]>([]);
+  useEffect(() => {
+    setProgress(loadProgress());
+    setUnlocked(loadUnlocked());
+  }, []);
 
   return (
     <main className="min-h-dvh aurora px-6 py-14">
@@ -42,6 +48,23 @@ function LevelSelect() {
         <p className="mt-2 text-muted-foreground">
           Solved {Object.keys(progress).length} of {LEVELS.length}
         </p>
+
+        <div className="mt-4 flex flex-wrap gap-2">
+          <Link
+            to="/lab"
+            className="inline-flex min-h-11 items-center rounded-full border border-accent/40 bg-accent/10 px-5 text-sm font-medium transition-all duration-200 hover:-translate-y-0.5 hover:bg-accent/20"
+          >
+            Light Laboratory
+          </Link>
+          <Link
+            to="/studio"
+            className="inline-flex min-h-11 items-center rounded-full border border-border bg-surface/60 px-5 text-sm font-medium transition-all duration-200 hover:-translate-y-0.5 hover:bg-surface-2"
+          >
+            Prism Studio
+          </Link>
+        </div>
+
+        <AchievementsPanel unlocked={unlocked} className="mt-8" />
 
         <div className="mt-10 space-y-10">
           {CHAPTERS.map((chapter) => (
