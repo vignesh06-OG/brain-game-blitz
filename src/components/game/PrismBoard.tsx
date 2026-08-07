@@ -72,7 +72,7 @@ function PieceShape({
             fill={color}
             filter="url(#glow)"
             animate={
-              reduceMotion ? { opacity: 1 } : { opacity: [0.75, 1, 0.75], r: [12, 14, 12] }
+              reduceMotion ? { opacity: 1, scale: 1 } : { opacity: [0.75, 1, 0.75], scale: [0.92, 1.08, 0.92] }
             }
             transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut" }}
           />
