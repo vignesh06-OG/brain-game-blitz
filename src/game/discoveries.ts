@@ -187,7 +187,15 @@ export function detect(result: TraceResult, board: Board): string[] {
   for (const [k, piece] of Object.entries(board.cells)) {
     if (piece.kind !== "target") continue;
     const got = result.hits[k] ?? 0;
-    const sources = result.segments.filter((s) => s.to === k || s.from === k).length;
+    const [tx, ty] = k.split(",").map(Number);
+    const sources = new Set(
+      result.segments
+        .filter(
+          (s) =>
+            (s.x2 === tx && s.y2 === ty) || (s.x1 === tx && s.y1 === ty),
+        )
+        .flatMap((s) => s.meta?.sources ?? []),
+    ).size;
     if (bits(got) > 1 && sources > 1) found.add("mixing");
     if (got === 7 && sources > 1) found.add("white");
   }
