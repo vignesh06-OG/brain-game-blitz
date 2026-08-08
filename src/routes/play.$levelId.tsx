@@ -30,7 +30,7 @@ import { useGame } from "@/game/useGame";
 import { usePlayerModel } from "@/game/photonmind/usePlayerModel";
 import { analyse } from "@/game/analysis";
 import type { Board } from "@/game/types";
-import type { Piece } from "@/game/types";
+import type { Level, Piece } from "@/game/types";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/play/$levelId")({
@@ -67,6 +67,24 @@ const trayLabel = (piece: Piece) => {
       return piece.kind;
   }
 };
+
+/**
+ * The first nudge scales with the level's difficulty band: early puzzles get a
+ * mechanical prompt, late puzzles get a way of thinking — never a move.
+ */
+const firstNudge = (level: Level) => {
+  switch (level.tier) {
+    case "Master":
+      return "Reason backwards. Start at a target, name the colour it demands, and ask which transformation could possibly produce it.";
+    case "Demanding":
+      return "Plan the whole network before you move — a target here is rarely reachable by a single beam.";
+    case "Testing":
+      return "Ask what each target actually needs, not just where it sits. The colour is the constraint.";
+    default:
+      return "Read the targets first — each glyph tells you the exact colour it needs.";
+  }
+};
+
 
 function PlayLevel() {
   const { levelId } = Route.useParams();
@@ -265,9 +283,14 @@ function LevelScreen({ levelId }: { levelId: string }) {
             <div className="min-w-0">
               <p className="text-xs tracking-widest text-muted-foreground uppercase">
                 Chapter {level.chapter} · {level.index}
+                {level.tier ? ` · ${level.tier}` : ""}
               </p>
               <h1 className="truncate text-xl font-extrabold sm:text-2xl">{level.name}</h1>
+              {level.concept ? (
+                <p className="truncate text-xs text-primary/80">{level.concept}</p>
+              ) : null}
             </div>
+
           </div>
           <div className="flex shrink-0 items-center gap-2 text-sm">
             <motion.span
@@ -440,10 +463,9 @@ function LevelScreen({ levelId }: { levelId: string }) {
                       Tutor
                     </p>
                     <p className="mt-2 text-muted-foreground">
-                      {hintLevel === 1
-                        ? "Read the targets first — each glyph tells you the exact colour it needs."
-                        : level.hint}
+                      {hintLevel === 1 ? firstNudge(level) : level.hint}
                     </p>
+
                   </div>
                 </motion.div>
               )}
