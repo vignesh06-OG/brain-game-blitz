@@ -2,7 +2,10 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 import {
   ArrowLeft,
+  ChevronDown,
   Eye,
+  Settings2,
+
   Lightbulb,
   RotateCcw,
   Radio,
