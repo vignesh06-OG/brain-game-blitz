@@ -25,10 +25,17 @@ const DEPTH_LABEL: Record<Depth, string> = {
  */
 export function DiscoveryToast({ ids, depth, reduceMotion = false, onDepthChange }: Props) {
   const [open, setOpen] = useState<string | null>(null);
+  const latest = ids.length ? ids[ids.length - 1]! : null;
 
   useEffect(() => {
-    if (ids.length) setOpen(ids[ids.length - 1]!);
-  }, [ids]);
+    if (!latest) return;
+    setOpen(latest);
+    // Never let the card sit on top of the board indefinitely — it is a
+    // notification, not a modal, and the player is mid-puzzle.
+    const t = setTimeout(() => setOpen((cur) => (cur === latest ? null : cur)), 11000);
+    return () => clearTimeout(t);
+  }, [latest]);
+
 
   const card = open ? DISCOVERY_BY_ID.get(open) : undefined;
 
