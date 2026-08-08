@@ -358,7 +358,7 @@ function LevelScreen({ levelId }: { levelId: string }) {
       )}
     >
       <AmbientBackdrop density={10} />
-      <div className="mx-auto w-full max-w-5xl">
+      <div className="mx-auto w-full max-w-5xl xl:max-w-6xl">
         <motion.header
           {...fade}
           className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3"
