@@ -17,21 +17,26 @@ import { AchievementToast } from "@/components/game/AchievementToast";
 import { AmbientBackdrop } from "@/components/game/AmbientBackdrop";
 import { CinematicSolve } from "@/components/game/CinematicSolve";
 import { CommentaryPanel } from "@/components/game/CommentaryPanel";
+import { DiscoveryToast } from "@/components/game/DiscoveryToast";
 import { PrismBoard } from "@/components/game/PrismBoard";
 import { CoachPanel } from "@/components/photonmind/CoachPanel";
 import { SolveTimeline } from "@/components/game/SolveTimeline";
 import { evaluate, type Achievement } from "@/game/achievements";
 import { setAudioEnabled } from "@/game/audio";
 import { useAdaptiveAudio } from "@/game/useAdaptiveAudio";
-import { colorGlyph, colorName } from "@/game/engine";
+import { colorGlyph, colorName, trace } from "@/game/engine";
 import { getLevel, nextLevel } from "@/game/levels";
 import { loadPrefs, recordSolve, savePrefs } from "@/game/progress";
-import { useGame } from "@/game/useGame";
+import { detect, loadDepth, recordDiscoveries, saveDepth, type Depth } from "@/game/discoveries";
+import { previewMove, useGame } from "@/game/useGame";
 import { usePlayerModel } from "@/game/photonmind/usePlayerModel";
+import { predict } from "@/game/photonmind/predict";
+import { forwardBiasOf, recordSolveRow } from "@/game/photonmind/calibration";
 import { analyse } from "@/game/analysis";
 import type { Board } from "@/game/types";
 import type { Level, Piece } from "@/game/types";
 import { cn } from "@/lib/utils";
+
 
 export const Route = createFileRoute("/play/$levelId")({
   head: ({ params }) => {
@@ -122,12 +127,53 @@ function LevelScreen({ levelId }: { levelId: string }) {
   const startedAt = useRef(Date.now());
   const player = usePlayerModel(level.par);
   const [solutionBoard, setSolutionBoard] = useState<Board | null>(null);
+  const [hoverCell, setHoverCell] = useState<string | null>(null);
+  const [depth, setDepth] = useState<Depth>("beginner");
+  const [freshDiscoveries, setFreshDiscoveries] = useState<string[]>([]);
   const next = nextLevel(levelId);
   const rm = prefs.reduceMotion;
 
-  useEffect(() => setPrefs(loadPrefs()), []);
+  useEffect(() => {
+    setPrefs(loadPrefs());
+    setDepth(loadDepth());
+  }, []);
 
   useAdaptiveAudio(game.result, game.litKeys.length, audioOn);
+
+  /**
+   * "What if?" — trace the board the hovered move *would* produce and show it
+   * as a ghost. Curiosity is free: nothing is committed, nothing is spent.
+   */
+  const ghost = useMemo(() => {
+    if (!hoverCell || game.result.solved) return null;
+    const [x, y] = hoverCell.split(",").map(Number) as [number, number];
+    const board = previewMove(game.board, x, y, game.selectedTrayId);
+    if (!board) return null;
+    const res = trace(board);
+    const delta = res.solvedCount - game.result.solvedCount;
+    return {
+      segments: res.segments,
+      delta,
+      verdict:
+        delta > 0
+          ? `This move lights ${delta} more target${delta > 1 ? "s" : ""}.`
+          : delta < 0
+            ? `This move would unlight ${-delta} target${delta < -1 ? "s" : ""}.`
+            : "Same targets lit — but the light takes a different road.",
+    };
+  }, [hoverCell, game.board, game.selectedTrayId, game.result.solved, game.result.solvedCount]);
+
+  // Discovery layer: the engine reports what genuinely happened in the trace,
+  // and only unseen phenomena unlock a card.
+  useEffect(() => {
+    const fresh = recordDiscoveries(detect(game.result, game.board));
+    if (fresh.length) setFreshDiscoveries((prev) => [...prev, ...fresh]);
+  }, [game.result, game.board]);
+
+  // The model commits to a prediction before the attempt, so the calibration
+  // ledger compares a real forecast against a real outcome.
+  const forecast = useMemo(() => predict(level.board), [level.board]);
+
 
   // PhotonMind observes the move stream locally; nothing leaves the device.
   const lastRecorded = useRef(0);
@@ -167,6 +213,7 @@ function LevelScreen({ levelId }: { levelId: string }) {
   useEffect(() => {
     if (game.result.solved && !celebrated) {
       setCelebrated(true);
+      const seconds = Math.round((Date.now() - startedAt.current) / 1000);
       const progress = recordSolve(level.id, game.moves);
       const perfect = Object.entries(progress).filter(([, m]) => m <= level.par).length;
       setUnlocked(
@@ -174,7 +221,7 @@ function LevelScreen({ levelId }: { levelId: string }) {
           levelId: level.id,
           moves: game.moves,
           par: level.par,
-          seconds: Math.round((Date.now() - startedAt.current) / 1000),
+          seconds,
           undos: undosRef.current,
           hintsUsed: hintLevel,
           mixedTargets: mixedLit,
@@ -185,8 +232,29 @@ function LevelScreen({ levelId }: { levelId: string }) {
           perfectSolves: perfect,
         }),
       );
+
+      // Forecast vs reality — the row that keeps the model honest.
+      const emitters: string[] = [];
+      const targets: string[] = [];
+      for (const [k, p] of Object.entries(level.board.cells)) {
+        if (p.kind === "emitter") emitters.push(k);
+        if (p.kind === "target") targets.push(k);
+      }
+      recordSolveRow({
+        levelId: level.id,
+        predictedDifficulty: forecast.difficulty,
+        predictedSeconds: forecast.solveSeconds,
+        modelConfidence: forecast.confidence,
+        seconds,
+        moves: game.moves,
+        par: level.par,
+        undos: undosRef.current,
+        hints: hintLevel,
+        forwardBias: forwardBiasOf(player.touchedCells, emitters, targets),
+      });
     }
-  }, [game.result, game.moves, level.id, level.par, celebrated, hintLevel, mixedLit]);
+  }, [game.result, game.moves, level, celebrated, hintLevel, mixedLit, forecast, player.touchedCells]);
+
 
   const restart = useCallback(() => {
     game.reset();
@@ -335,7 +403,11 @@ function LevelScreen({ levelId }: { levelId: string }) {
               litKeys={game.litKeys}
               misroutedKeys={game.misroutedKeys}
               lastTouched={game.lastTouched}
+              onInspectCell={setHoverCell}
+              ghostSegments={ghost?.segments ?? null}
+              ghostCell={ghost ? hoverCell : null}
             />
+
 
             {/* Live status — the game always says what is wrong, never just fails. */}
             <div
@@ -363,7 +435,19 @@ function LevelScreen({ levelId }: { levelId: string }) {
                   aria-hidden="true"
                 />
               )}
-              <p className="min-w-0">{status.text}</p>
+              <p className="min-w-0">
+                {ghost ? (
+                  <>
+                    <span className="font-display text-[11px] tracking-widest text-accent uppercase">
+                      What if ·{" "}
+                    </span>
+                    {ghost.verdict}
+                  </>
+                ) : (
+                  status.text
+                )}
+              </p>
+
             </div>
 
             {game.board.tray.length > 0 && (
@@ -553,7 +637,7 @@ function LevelScreen({ levelId }: { levelId: string }) {
             </button>
 
             <p className="hidden pt-1 text-xs text-muted-foreground lg:block">
-              Shortcuts: <kbd>U</kbd> undo · <kbd>R</kbd> reset · <kbd>H</kbd> hint
+              Hover or tab across any cell to preview the move before you spend it. Shortcuts: <kbd>U</kbd> undo · <kbd>R</kbd> reset · <kbd>H</kbd> hint
             </p>
           </motion.aside>
         </div>
@@ -620,6 +704,16 @@ function LevelScreen({ levelId }: { levelId: string }) {
       </AnimatePresence>
 
       <AchievementToast unlocked={unlocked} reduceMotion={rm} />
+
+      <DiscoveryToast
+        ids={freshDiscoveries}
+        depth={depth}
+        reduceMotion={rm}
+        onDepthChange={(d) => {
+          setDepth(d);
+          saveDepth(d);
+        }}
+      />
 
       {/* Cinematic victory: bloom, particles, star rating and instant replay */}
       <CinematicSolve
