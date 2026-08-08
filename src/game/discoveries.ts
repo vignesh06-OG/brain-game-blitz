@@ -188,16 +188,15 @@ export function detect(result: TraceResult, board: Board): string[] {
     if (piece.kind !== "target") continue;
     const got = result.hits[k] ?? 0;
     const [tx, ty] = k.split(",").map(Number);
-    const sources = new Set(
-      result.segments
-        .filter(
-          (s) =>
-            (s.x2 === tx && s.y2 === ty) || (s.x1 === tx && s.y1 === ty),
-        )
-        .flatMap((s) => s.meta?.sources ?? []),
-    ).size;
-    if (bits(got) > 1 && sources > 1) found.add("mixing");
-    if (got === 7 && sources > 1) found.add("white");
+    // Real mixing means two beams of *different* colour arriving here — not one
+    // white beam that already carried three components from the emitter.
+    const incoming = result.segments.filter(
+      (s) => (s.x2 === tx && s.y2 === ty) || (s.x1 === tx && s.y1 === ty),
+    );
+    const hues = new Set(incoming.map((s) => s.color));
+    const combined = hues.size > 1;
+    if (bits(got) > 1 && combined) found.add("mixing");
+    if (got === 7 && combined) found.add("white");
   }
   for (const s of result.segments) {
     if (bits(s.color) > 1 && (s.meta?.sources.length ?? 1) > 1) found.add("mixing");
