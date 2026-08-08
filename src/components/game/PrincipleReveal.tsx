@@ -32,8 +32,9 @@ export function PrincipleReveal({
       className="w-full rounded-2xl border border-primary/35 bg-primary/[0.06] p-4 text-left"
     >
       <p className="font-display text-[0.65rem] tracking-[0.3em] text-primary uppercase">
-        What you just did
+        You discovered
       </p>
+
       <h3 className="mt-1 font-display text-lg font-bold">{reveal.principle}</h3>
 
       <div className="mt-3 flex flex-wrap gap-1.5">
