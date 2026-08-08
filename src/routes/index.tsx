@@ -126,6 +126,18 @@ function Landing() {
             />
           </Link>
           <Link
+            to="/experience"
+            className="inline-flex min-h-11 items-center rounded-full border border-primary/45 bg-primary/10 px-6 text-sm font-medium backdrop-blur transition-all duration-200 hover:-translate-y-0.5 hover:bg-primary/20"
+          >
+            90-second tour
+          </Link>
+          <Link
+            to="/discoveries"
+            className="inline-flex min-h-11 items-center rounded-full border border-accent/40 bg-accent/10 px-6 text-sm font-medium backdrop-blur transition-all duration-200 hover:-translate-y-0.5 hover:bg-accent/20"
+          >
+            Discovery journal
+          </Link>
+          <Link
             to="/studio"
             className="inline-flex min-h-11 items-center rounded-full border border-primary/45 bg-primary/10 px-6 text-sm font-medium backdrop-blur transition-all duration-200 hover:-translate-y-0.5 hover:bg-primary/20"
           >
