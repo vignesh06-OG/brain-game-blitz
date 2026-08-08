@@ -166,9 +166,12 @@ function LevelScreen({ levelId }: { levelId: string }) {
   // Discovery layer: the engine reports what genuinely happened in the trace,
   // and only unseen phenomena unlock a card.
   useEffect(() => {
+    // Discoveries are earned, never granted: nothing unlocks from the board a
+    // level ships with — the player has to have changed something.
+    if (game.moves === 0) return;
     const fresh = recordDiscoveries(detect(game.result, game.board));
     if (fresh.length) setFreshDiscoveries((prev) => [...prev, ...fresh]);
-  }, [game.result, game.board]);
+  }, [game.result, game.board, game.moves]);
 
   // The model commits to a prediction before the attempt, so the calibration
   // ledger compares a real forecast against a real outcome.

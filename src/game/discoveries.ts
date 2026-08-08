@@ -187,11 +187,12 @@ export function detect(result: TraceResult, board: Board): string[] {
   for (const [k, piece] of Object.entries(board.cells)) {
     if (piece.kind !== "target") continue;
     const got = result.hits[k] ?? 0;
-    if (bits(got) > 1) found.add("mixing");
-    if (got === 7) found.add("white");
+    const sources = result.segments.filter((s) => s.to === k || s.from === k).length;
+    if (bits(got) > 1 && sources > 1) found.add("mixing");
+    if (got === 7 && sources > 1) found.add("white");
   }
   for (const s of result.segments) {
-    if (bits(s.color) > 1) found.add("mixing");
+    if (bits(s.color) > 1 && (s.meta?.sources.length ?? 1) > 1) found.add("mixing");
     if (s.color === 7 && (s.meta?.sources.length ?? 1) > 1) found.add("white");
   }
 
