@@ -336,9 +336,14 @@ function LevelScreen({ levelId }: { levelId: string }) {
   };
 
   return (
-    <main className={cn("min-h-dvh aurora px-4 py-6 sm:px-6", rm && "reduce-motion")}>
+    <main
+      className={cn(
+        "flex min-h-dvh flex-col justify-center aurora px-4 py-6 sm:px-6",
+        rm && "reduce-motion",
+      )}
+    >
       <AmbientBackdrop density={10} />
-      <div className="mx-auto max-w-5xl">
+      <div className="mx-auto w-full max-w-5xl">
         <motion.header
           {...fade}
           className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3"
@@ -356,9 +361,11 @@ function LevelScreen({ levelId }: { levelId: string }) {
                 Chapter {level.chapter} · {level.index}
                 {level.tier ? ` · ${level.tier}` : ""}
               </p>
-              <h1 className="truncate text-xl font-extrabold sm:text-2xl">{level.name}</h1>
+              <h1 className="text-xl leading-tight font-extrabold text-balance sm:text-2xl">
+                {level.name}
+              </h1>
               {level.concept ? (
-                <p className="truncate text-xs text-primary/80">{level.concept}</p>
+                <p className="text-xs text-primary/80">{level.concept}</p>
               ) : null}
             </div>
 

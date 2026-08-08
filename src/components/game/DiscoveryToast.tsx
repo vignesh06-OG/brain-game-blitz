@@ -25,10 +25,17 @@ const DEPTH_LABEL: Record<Depth, string> = {
  */
 export function DiscoveryToast({ ids, depth, reduceMotion = false, onDepthChange }: Props) {
   const [open, setOpen] = useState<string | null>(null);
+  const latest = ids.length ? ids[ids.length - 1]! : null;
 
   useEffect(() => {
-    if (ids.length) setOpen(ids[ids.length - 1]!);
-  }, [ids]);
+    if (!latest) return;
+    setOpen(latest);
+    // Never let the card sit on top of the board indefinitely — it is a
+    // notification, not a modal, and the player is mid-puzzle.
+    const t = setTimeout(() => setOpen((cur) => (cur === latest ? null : cur)), 11000);
+    return () => clearTimeout(t);
+  }, [latest]);
+
 
   const card = open ? DISCOVERY_BY_ID.get(open) : undefined;
 
@@ -41,10 +48,10 @@ export function DiscoveryToast({ ids, depth, reduceMotion = false, onDepthChange
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 24, scale: 0.97 }}
           transition={{ type: "spring", stiffness: 300, damping: 28 }}
-          className="fixed inset-x-0 bottom-0 z-30 px-4 pb-5"
+          className="pointer-events-none fixed inset-x-0 bottom-0 z-30 px-4 pb-5"
           aria-live="polite"
         >
-          <div className="mx-auto max-w-md rounded-2xl border border-accent/45 bg-surface/95 p-4 shadow-lg backdrop-blur">
+          <div className="pointer-events-auto mx-auto max-w-md rounded-2xl border border-accent/45 bg-surface/95 p-4 shadow-lg backdrop-blur">
             <div className="flex items-start gap-3">
               <Telescope className="mt-0.5 h-5 w-5 shrink-0 text-accent" aria-hidden="true" />
               <div className="min-w-0 flex-1">
