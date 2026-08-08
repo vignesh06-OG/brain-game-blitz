@@ -7,8 +7,9 @@ type Depth = "casual" | "curious" | "advanced";
 const TABS: { id: Depth; label: string }[] = [
   { id: "casual", label: "In short" },
   { id: "curious", label: "A bit deeper" },
-  { id: "advanced", label: "The physics" },
+  { id: "advanced", label: "Model vs. real optics" },
 ];
+
 
 /**
  * The reveal. It arrives only after the player has already solved it, and it
