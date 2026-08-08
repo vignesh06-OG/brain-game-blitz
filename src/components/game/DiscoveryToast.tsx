@@ -41,10 +41,10 @@ export function DiscoveryToast({ ids, depth, reduceMotion = false, onDepthChange
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 24, scale: 0.97 }}
           transition={{ type: "spring", stiffness: 300, damping: 28 }}
-          className="fixed inset-x-0 bottom-0 z-30 px-4 pb-5"
+          className="pointer-events-none fixed inset-x-0 bottom-0 z-30 px-4 pb-5"
           aria-live="polite"
         >
-          <div className="mx-auto max-w-md rounded-2xl border border-accent/45 bg-surface/95 p-4 shadow-lg backdrop-blur">
+          <div className="pointer-events-auto mx-auto max-w-md rounded-2xl border border-accent/45 bg-surface/95 p-4 shadow-lg backdrop-blur">
             <div className="flex items-start gap-3">
               <Telescope className="mt-0.5 h-5 w-5 shrink-0 text-accent" aria-hidden="true" />
               <div className="min-w-0 flex-1">
