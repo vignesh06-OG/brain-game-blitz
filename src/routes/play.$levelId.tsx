@@ -417,7 +417,14 @@ function LevelScreen({ levelId }: { levelId: string }) {
         </div>
 
         <div className="mt-5 grid gap-6 lg:grid-cols-[minmax(0,1fr)_264px]">
-          <motion.div {...fade} className="min-w-0">
+          {/* The board owns the vertical space: it grows on tall viewports and
+              shrinks on short ones instead of leaving dead air. */}
+          <motion.div
+            {...fade}
+            className="mx-auto min-w-0 w-full"
+            style={{ maxWidth: "min(100%, calc(100dvh - 19rem))" }}
+          >
+
             <PrismBoard
               board={game.board}
               result={game.result}
