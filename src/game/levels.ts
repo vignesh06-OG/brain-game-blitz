@@ -178,11 +178,12 @@ export const LEVELS: Level[] = [
     chapter: 3,
     index: 1,
     name: "Additive Superposition",
-    concept: "Three beams converging into one colour",
+    concept: "One beam owing two debts",
     tier: "Demanding",
-    teaches: "Beams that arrive together add. Red plus green plus blue is white again.",
-    hint: "White is not a colour you route — it is three beams landing on the same cell.",
-    par: 2,
+    teaches:
+      "Beams that arrive together add. Red plus green plus blue is white again — and one beam can serve two targets at once.",
+    hint: "White needs all three channels. But red is also the only source the second target can ever use, so it has to do both jobs.",
+    par: 3,
     board: board({
       width: 7,
       height: 7,
@@ -190,13 +191,14 @@ export const LEVELS: Level[] = [
         [0, 3, emitter(1, RED)],
         [0, 0, emitter(1, GREEN)],
         [0, 6, emitter(1, BLUE)],
+        [3, 3, splitter(0)],
+        [3, 5, target(RED)],
         [6, 0, mirror(0)],
         [6, 6, mirror(1)],
         [6, 3, target(WHITE)],
-        [3, 1, wall()],
-        [3, 5, wall()],
       ],
     }),
+
   },
   {
     id: "3-2",
