@@ -434,4 +434,11 @@ export const CHAPTERS = [
     blurb:
       "Long optical paths, several sources and no spare moves. The final lock has to be solved backwards, from the colour it demands to the light that can supply it.",
   },
+  {
+    n: 5,
+    name: "The Master Trial",
+    subtitle: "Question light",
+    blurb:
+      "One puzzle. Everything the campaign taught you about taking light apart, asked backwards.",
+  },
 ];
