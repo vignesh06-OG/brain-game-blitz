@@ -134,6 +134,8 @@ function LevelScreen({ levelId }: { levelId: string }) {
   const [celebrated, setCelebrated] = useState(false);
   const [nudgeDismissed, setNudgeDismissed] = useState(false);
   const [commentary, setCommentary] = useState(false);
+  const [optionsOpen, setOptionsOpen] = useState(false);
+
   const [audioOn, setAudioOn] = useState(false);
   const [unlocked, setUnlocked] = useState<Achievement[]>([]);
   const undosRef = useRef(0);
