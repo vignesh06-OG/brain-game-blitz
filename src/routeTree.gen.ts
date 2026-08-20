@@ -19,6 +19,7 @@ import { Route as ExperienceIndexRouteImport } from './routes/experience.index'
 import { Route as IntelligenceIndexRouteImport } from './routes/intelligence.index'
 import { Route as LabIndexRouteImport } from './routes/lab.index'
 import { Route as MissionsIndexRouteImport } from './routes/missions.index'
+import { Route as MissionsMissionIdRouteImport } from './routes/missions.$missionId'
 import { Route as PlayIndexRouteImport } from './routes/play.index'
 import { Route as PlayLevelIdRouteImport } from './routes/play.$levelId'
 import { Route as SandboxIndexRouteImport } from './routes/sandbox.index'
@@ -78,6 +79,11 @@ const MissionsIndexRoute = MissionsIndexRouteImport.update({
   path: '/missions/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MissionsMissionIdRoute = MissionsMissionIdRouteImport.update({
+  id: '/missions/$missionId',
+  path: '/missions/$missionId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PlayIndexRoute = PlayIndexRouteImport.update({
   id: '/play/',
   path: '/play/',
@@ -116,6 +122,7 @@ export interface FileRoutesByFullPath {
   '/mcp': typeof McpRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/missions/$missionId': typeof MissionsMissionIdRoute
   '/play/$levelId': typeof PlayLevelIdRoute
   '/discoveries/': typeof DiscoveriesIndexRoute
   '/experience/': typeof ExperienceIndexRoute
@@ -134,6 +141,7 @@ export interface FileRoutesByTo {
   '/mcp': typeof McpRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/missions/$missionId': typeof MissionsMissionIdRoute
   '/play/$levelId': typeof PlayLevelIdRoute
   '/discoveries': typeof DiscoveriesIndexRoute
   '/experience': typeof ExperienceIndexRoute
@@ -153,6 +161,7 @@ export interface FileRoutesById {
   '/mcp': typeof McpRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/missions/$missionId': typeof MissionsMissionIdRoute
   '/play/$levelId': typeof PlayLevelIdRoute
   '/discoveries/': typeof DiscoveriesIndexRoute
   '/experience/': typeof ExperienceIndexRoute
@@ -173,6 +182,7 @@ export interface FileRouteTypes {
     | '/mcp'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/missions/$missionId'
     | '/play/$levelId'
     | '/discoveries/'
     | '/experience/'
@@ -191,6 +201,7 @@ export interface FileRouteTypes {
     | '/mcp'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/missions/$missionId'
     | '/play/$levelId'
     | '/discoveries'
     | '/experience'
@@ -209,6 +220,7 @@ export interface FileRouteTypes {
     | '/mcp'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/missions/$missionId'
     | '/play/$levelId'
     | '/discoveries/'
     | '/experience/'
@@ -228,6 +240,7 @@ export interface RootRouteChildren {
   McpRoute: typeof McpRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  MissionsMissionIdRoute: typeof MissionsMissionIdRoute
   PlayLevelIdRoute: typeof PlayLevelIdRoute
   DiscoveriesIndexRoute: typeof DiscoveriesIndexRoute
   ExperienceIndexRoute: typeof ExperienceIndexRoute
@@ -313,6 +326,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MissionsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/missions/$missionId': {
+      id: '/missions/$missionId'
+      path: '/missions/$missionId'
+      fullPath: '/missions/$missionId'
+      preLoaderRoute: typeof MissionsMissionIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/play/': {
       id: '/play/'
       path: '/play'
@@ -365,6 +385,7 @@ const rootRouteChildren: RootRouteChildren = {
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
+  MissionsMissionIdRoute: MissionsMissionIdRoute,
   PlayLevelIdRoute: PlayLevelIdRoute,
   DiscoveriesIndexRoute: DiscoveriesIndexRoute,
   ExperienceIndexRoute: ExperienceIndexRoute,

@@ -52,7 +52,10 @@ function MissionIndex() {
           </p>
         </header>
 
-        <Fibre className="my-8" />
+        <Fibre
+          className="my-8"
+          value={MISSIONS.length ? Object.keys(records).length / MISSIONS.length : 0}
+        />
 
         <ul className="space-y-px">
           {MISSIONS.map((m) => {
