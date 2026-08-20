@@ -667,6 +667,16 @@ function LevelScreen({ levelId }: { levelId: string }) {
               )}
             </AnimatePresence>
 
+            <LawsRail discovered={discovered} reduceMotion={rm} />
+
+            {!game.result.solved && (
+              <DirectorPanel
+                decision={decision}
+                reduceMotion={rm}
+                onRequestSolution={() => setSolutionRequested(true)}
+              />
+            )}
+
             <AnimatePresence initial={false}>
               {(hintLevel > 0 || game.struggling) && !game.result.solved && (
                 <motion.div
@@ -688,6 +698,8 @@ function LevelScreen({ levelId }: { levelId: string }) {
                 </motion.div>
               )}
             </AnimatePresence>
+
+
 
             {/* Everything below is secondary: it stays one tab-stop away but
                 never competes with the board for attention. */}
