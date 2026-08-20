@@ -352,6 +352,48 @@ function LevelScreen({ levelId }: { levelId: string }) {
   const stars = Math.max(0, 3 - Math.max(0, game.moves - level.par));
   const progress = targetCount ? solvedCount / targetCount : 0;
 
+  /**
+   * The Game Director. Pure, cheap, and recomputed only from telemetry the
+   * game already holds — it never runs the solver on the interaction path.
+   */
+  const decision = useMemo(
+    () =>
+      direct({
+        moves: game.moves,
+        par: level.par,
+        undos: undosRef.current,
+        resets,
+        idleMs,
+        hintsRequested: hintLevel,
+        solutionRequested,
+        solvedCount,
+        targetCount,
+        misrouted,
+        behaviour: player.behaviour,
+        solution: solutionBoard,
+        board: game.board,
+      }),
+    [
+      game.moves,
+      game.board,
+      level.par,
+      resets,
+      idleMs,
+      hintLevel,
+      solutionRequested,
+      solvedCount,
+      targetCount,
+      misrouted,
+      player.behaviour,
+      solutionBoard,
+    ],
+  );
+
+  /**
+   * Failure feedback separates *path*, *colour* and *nothing arriving*, so a
+   * wrong attempt teaches which kind of mistake it was without explaining the
+   * puzzle away.
+   */
   const status = solved
     ? { tone: "good" as const, text: "Every target is burning the right colour." }
     : misrouted
@@ -359,18 +401,20 @@ function LevelScreen({ levelId }: { levelId: string }) {
           tone: "bad" as const,
           text:
             misrouted === 1
-              ? "One target is getting the wrong mix of light."
-              : `${misrouted} targets are getting the wrong mix of light.`,
+              ? "Path is valid — channel is wrong. One target receives light but rejects the mix."
+              : `Path is valid — channel is wrong. ${misrouted} targets receive light but reject the mix.`,
         }
       : solvedCount
         ? {
             tone: "mid" as const,
-            text: `${solvedCount} of ${targetCount} lit — keep routing.`,
+            text: `${solvedCount} of ${targetCount} accepted. The rest receive nothing yet — that is a path problem.`,
           }
         : {
             tone: "mid" as const,
             text: "No light is landing yet. Follow the beam and find the first turn.",
           };
+
+
 
   const fade = rm
     ? { initial: false as const, animate: { opacity: 1 }, transition: { duration: 0 } }
