@@ -22,6 +22,7 @@ import { Route as MissionsIndexRouteImport } from './routes/missions.index'
 import { Route as MissionsMissionIdRouteImport } from './routes/missions.$missionId'
 import { Route as PlayIndexRouteImport } from './routes/play.index'
 import { Route as PlayLevelIdRouteImport } from './routes/play.$levelId'
+import { Route as ProfileIndexRouteImport } from './routes/profile.index'
 import { Route as SandboxIndexRouteImport } from './routes/sandbox.index'
 import { Route as StudioIndexRouteImport } from './routes/studio.index'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
@@ -94,6 +95,11 @@ const PlayLevelIdRoute = PlayLevelIdRouteImport.update({
   path: '/play/$levelId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProfileIndexRoute = ProfileIndexRouteImport.update({
+  id: '/profile/',
+  path: '/profile/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SandboxIndexRoute = SandboxIndexRouteImport.update({
   id: '/sandbox/',
   path: '/sandbox/',
@@ -130,6 +136,7 @@ export interface FileRoutesByFullPath {
   '/lab/': typeof LabIndexRoute
   '/missions/': typeof MissionsIndexRoute
   '/play/': typeof PlayIndexRoute
+  '/profile/': typeof ProfileIndexRoute
   '/sandbox/': typeof SandboxIndexRoute
   '/studio/': typeof StudioIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -149,6 +156,7 @@ export interface FileRoutesByTo {
   '/lab': typeof LabIndexRoute
   '/missions': typeof MissionsIndexRoute
   '/play': typeof PlayIndexRoute
+  '/profile': typeof ProfileIndexRoute
   '/sandbox': typeof SandboxIndexRoute
   '/studio': typeof StudioIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -169,6 +177,7 @@ export interface FileRoutesById {
   '/lab/': typeof LabIndexRoute
   '/missions/': typeof MissionsIndexRoute
   '/play/': typeof PlayIndexRoute
+  '/profile/': typeof ProfileIndexRoute
   '/sandbox/': typeof SandboxIndexRoute
   '/studio/': typeof StudioIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -190,6 +199,7 @@ export interface FileRouteTypes {
     | '/lab/'
     | '/missions/'
     | '/play/'
+    | '/profile/'
     | '/sandbox/'
     | '/studio/'
     | '/.lovable/oauth/consent'
@@ -209,6 +219,7 @@ export interface FileRouteTypes {
     | '/lab'
     | '/missions'
     | '/play'
+    | '/profile'
     | '/sandbox'
     | '/studio'
     | '/.lovable/oauth/consent'
@@ -228,6 +239,7 @@ export interface FileRouteTypes {
     | '/lab/'
     | '/missions/'
     | '/play/'
+    | '/profile/'
     | '/sandbox/'
     | '/studio/'
     | '/.lovable/oauth/consent'
@@ -248,6 +260,7 @@ export interface RootRouteChildren {
   LabIndexRoute: typeof LabIndexRoute
   MissionsIndexRoute: typeof MissionsIndexRoute
   PlayIndexRoute: typeof PlayIndexRoute
+  ProfileIndexRoute: typeof ProfileIndexRoute
   SandboxIndexRoute: typeof SandboxIndexRoute
   StudioIndexRoute: typeof StudioIndexRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
@@ -347,6 +360,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PlayLevelIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/profile/': {
+      id: '/profile/'
+      path: '/profile'
+      fullPath: '/profile/'
+      preLoaderRoute: typeof ProfileIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sandbox/': {
       id: '/sandbox/'
       path: '/sandbox'
@@ -393,6 +413,7 @@ const rootRouteChildren: RootRouteChildren = {
   LabIndexRoute: LabIndexRoute,
   MissionsIndexRoute: MissionsIndexRoute,
   PlayIndexRoute: PlayIndexRoute,
+  ProfileIndexRoute: ProfileIndexRoute,
   SandboxIndexRoute: SandboxIndexRoute,
   StudioIndexRoute: StudioIndexRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
