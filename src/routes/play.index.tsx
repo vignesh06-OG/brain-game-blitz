@@ -6,6 +6,9 @@ import { AchievementsPanel } from "@/components/game/AchievementsPanel";
 import { loadUnlocked } from "@/game/achievements";
 import { CHAPTERS, LEVELS } from "@/game/levels";
 import { loadProgress } from "@/game/progress";
+import { loadDiscovered } from "@/game/discoveries";
+import { LightLabComplete } from "@/components/game/LightLabComplete";
+
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/play/")({
