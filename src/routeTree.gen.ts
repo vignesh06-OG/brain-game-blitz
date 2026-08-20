@@ -18,6 +18,7 @@ import { Route as DiscoveriesIndexRouteImport } from './routes/discoveries.index
 import { Route as ExperienceIndexRouteImport } from './routes/experience.index'
 import { Route as IntelligenceIndexRouteImport } from './routes/intelligence.index'
 import { Route as LabIndexRouteImport } from './routes/lab.index'
+import { Route as MissionsIndexRouteImport } from './routes/missions.index'
 import { Route as PlayIndexRouteImport } from './routes/play.index'
 import { Route as PlayLevelIdRouteImport } from './routes/play.$levelId'
 import { Route as SandboxIndexRouteImport } from './routes/sandbox.index'
@@ -72,6 +73,11 @@ const LabIndexRoute = LabIndexRouteImport.update({
   path: '/lab/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MissionsIndexRoute = MissionsIndexRouteImport.update({
+  id: '/missions/',
+  path: '/missions/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PlayIndexRoute = PlayIndexRouteImport.update({
   id: '/play/',
   path: '/play/',
@@ -115,6 +121,7 @@ export interface FileRoutesByFullPath {
   '/experience/': typeof ExperienceIndexRoute
   '/intelligence/': typeof IntelligenceIndexRoute
   '/lab/': typeof LabIndexRoute
+  '/missions/': typeof MissionsIndexRoute
   '/play/': typeof PlayIndexRoute
   '/sandbox/': typeof SandboxIndexRoute
   '/studio/': typeof StudioIndexRoute
@@ -132,6 +139,7 @@ export interface FileRoutesByTo {
   '/experience': typeof ExperienceIndexRoute
   '/intelligence': typeof IntelligenceIndexRoute
   '/lab': typeof LabIndexRoute
+  '/missions': typeof MissionsIndexRoute
   '/play': typeof PlayIndexRoute
   '/sandbox': typeof SandboxIndexRoute
   '/studio': typeof StudioIndexRoute
@@ -150,6 +158,7 @@ export interface FileRoutesById {
   '/experience/': typeof ExperienceIndexRoute
   '/intelligence/': typeof IntelligenceIndexRoute
   '/lab/': typeof LabIndexRoute
+  '/missions/': typeof MissionsIndexRoute
   '/play/': typeof PlayIndexRoute
   '/sandbox/': typeof SandboxIndexRoute
   '/studio/': typeof StudioIndexRoute
@@ -169,6 +178,7 @@ export interface FileRouteTypes {
     | '/experience/'
     | '/intelligence/'
     | '/lab/'
+    | '/missions/'
     | '/play/'
     | '/sandbox/'
     | '/studio/'
@@ -186,6 +196,7 @@ export interface FileRouteTypes {
     | '/experience'
     | '/intelligence'
     | '/lab'
+    | '/missions'
     | '/play'
     | '/sandbox'
     | '/studio'
@@ -203,6 +214,7 @@ export interface FileRouteTypes {
     | '/experience/'
     | '/intelligence/'
     | '/lab/'
+    | '/missions/'
     | '/play/'
     | '/sandbox/'
     | '/studio/'
@@ -221,6 +233,7 @@ export interface RootRouteChildren {
   ExperienceIndexRoute: typeof ExperienceIndexRoute
   IntelligenceIndexRoute: typeof IntelligenceIndexRoute
   LabIndexRoute: typeof LabIndexRoute
+  MissionsIndexRoute: typeof MissionsIndexRoute
   PlayIndexRoute: typeof PlayIndexRoute
   SandboxIndexRoute: typeof SandboxIndexRoute
   StudioIndexRoute: typeof StudioIndexRoute
@@ -293,6 +306,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LabIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/missions/': {
+      id: '/missions/'
+      path: '/missions'
+      fullPath: '/missions/'
+      preLoaderRoute: typeof MissionsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/play/': {
       id: '/play/'
       path: '/play'
@@ -350,6 +370,7 @@ const rootRouteChildren: RootRouteChildren = {
   ExperienceIndexRoute: ExperienceIndexRoute,
   IntelligenceIndexRoute: IntelligenceIndexRoute,
   LabIndexRoute: LabIndexRoute,
+  MissionsIndexRoute: MissionsIndexRoute,
   PlayIndexRoute: PlayIndexRoute,
   SandboxIndexRoute: SandboxIndexRoute,
   StudioIndexRoute: StudioIndexRoute,
