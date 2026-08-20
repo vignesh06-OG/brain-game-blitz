@@ -23,8 +23,10 @@ import { MasterIntro } from "@/components/game/MasterIntro";
 import { PrincipleReveal } from "@/components/game/PrincipleReveal";
 import { CommentaryPanel } from "@/components/game/CommentaryPanel";
 import { DiscoveryToast } from "@/components/game/DiscoveryToast";
+import { LawsRail } from "@/components/game/LawsRail";
 import { PrismBoard } from "@/components/game/PrismBoard";
 import { CoachPanel } from "@/components/photonmind/CoachPanel";
+import { DirectorPanel } from "@/components/photonmind/DirectorPanel";
 import { SolveTimeline } from "@/components/game/SolveTimeline";
 import { evaluate, type Achievement } from "@/game/achievements";
 import { setAudioEnabled } from "@/game/audio";
@@ -32,15 +34,24 @@ import { useAdaptiveAudio } from "@/game/useAdaptiveAudio";
 import { colorGlyph, colorName, trace } from "@/game/engine";
 import { getLevel, nextLevel } from "@/game/levels";
 import { loadPrefs, recordSolve, savePrefs } from "@/game/progress";
-import { detect, loadDepth, recordDiscoveries, saveDepth, type Depth } from "@/game/discoveries";
+import {
+  detect,
+  loadDepth,
+  loadDiscovered,
+  recordDiscoveries,
+  saveDepth,
+  type Depth,
+} from "@/game/discoveries";
 import { previewMove, useGame } from "@/game/useGame";
 import { usePlayerModel } from "@/game/photonmind/usePlayerModel";
+import { direct } from "@/game/photonmind/director";
 import { predict } from "@/game/photonmind/predict";
 import { forwardBiasOf, recordSolveRow } from "@/game/photonmind/calibration";
 import { analyse } from "@/game/analysis";
 import type { Board } from "@/game/types";
 import type { Level, Piece } from "@/game/types";
 import { cn } from "@/lib/utils";
+
 
 
 export const Route = createFileRoute("/play/$levelId")({
@@ -145,15 +156,33 @@ function LevelScreen({ levelId }: { levelId: string }) {
   const [hoverCell, setHoverCell] = useState<string | null>(null);
   const [depth, setDepth] = useState<Depth>("beginner");
   const [freshDiscoveries, setFreshDiscoveries] = useState<string[]>([]);
+  const [discovered, setDiscovered] = useState<string[]>([]);
+  // Director telemetry that the game loop does not already track.
+  const [resets, setResets] = useState(0);
+  const [solutionRequested, setSolutionRequested] = useState(false);
+  const [idleMs, setIdleMs] = useState(0);
+  const lastMoveAt = useRef(Date.now());
   const next = nextLevel(levelId);
   const rm = prefs.reduceMotion;
 
   useEffect(() => {
     setPrefs(loadPrefs());
     setDepth(loadDepth());
+    setDiscovered(loadDiscovered());
   }, []);
 
+  // Idle clock — coarse on purpose: the director only needs tens of seconds,
+  // and a slow tick keeps this off the interaction path.
+  useEffect(() => {
+    lastMoveAt.current = Date.now();
+    setIdleMs(0);
+    if (game.result.solved) return;
+    const id = window.setInterval(() => setIdleMs(Date.now() - lastMoveAt.current), 5_000);
+    return () => window.clearInterval(id);
+  }, [game.moves, game.result.solved]);
+
   useAdaptiveAudio(game.result, game.litKeys.length, audioOn);
+
 
   /**
    * "What if?" — trace the board the hovered move *would* produce and show it
@@ -185,8 +214,12 @@ function LevelScreen({ levelId }: { levelId: string }) {
     // level ships with — the player has to have changed something.
     if (game.moves === 0) return;
     const fresh = recordDiscoveries(detect(game.result, game.board));
-    if (fresh.length) setFreshDiscoveries((prev) => [...prev, ...fresh]);
+    if (fresh.length) {
+      setFreshDiscoveries((prev) => [...prev, ...fresh]);
+      setDiscovered((prev) => [...prev, ...fresh]);
+    }
   }, [game.result, game.board, game.moves]);
+
 
   // The model commits to a prediction before the attempt, so the calibration
   // ledger compares a real forecast against a real outcome.
@@ -284,7 +317,10 @@ function LevelScreen({ levelId }: { levelId: string }) {
     player.clear();
     setCelebrated(false);
     setNudgeDismissed(false);
+    setResets((r) => r + 1);
+    setSolutionRequested(false);
   }, [game, player]);
+
 
   // Keyboard shortcuts — desktop players never have to reach for the mouse.
   useEffect(() => {
@@ -316,6 +352,48 @@ function LevelScreen({ levelId }: { levelId: string }) {
   const stars = Math.max(0, 3 - Math.max(0, game.moves - level.par));
   const progress = targetCount ? solvedCount / targetCount : 0;
 
+  /**
+   * The Game Director. Pure, cheap, and recomputed only from telemetry the
+   * game already holds — it never runs the solver on the interaction path.
+   */
+  const decision = useMemo(
+    () =>
+      direct({
+        moves: game.moves,
+        par: level.par,
+        undos: undosRef.current,
+        resets,
+        idleMs,
+        hintsRequested: hintLevel,
+        solutionRequested,
+        solvedCount,
+        targetCount,
+        misrouted,
+        behaviour: player.behaviour,
+        solution: solutionBoard,
+        board: game.board,
+      }),
+    [
+      game.moves,
+      game.board,
+      level.par,
+      resets,
+      idleMs,
+      hintLevel,
+      solutionRequested,
+      solvedCount,
+      targetCount,
+      misrouted,
+      player.behaviour,
+      solutionBoard,
+    ],
+  );
+
+  /**
+   * Failure feedback separates *path*, *colour* and *nothing arriving*, so a
+   * wrong attempt teaches which kind of mistake it was without explaining the
+   * puzzle away.
+   */
   const status = solved
     ? { tone: "good" as const, text: "Every target is burning the right colour." }
     : misrouted
@@ -323,18 +401,20 @@ function LevelScreen({ levelId }: { levelId: string }) {
           tone: "bad" as const,
           text:
             misrouted === 1
-              ? "One target is getting the wrong mix of light."
-              : `${misrouted} targets are getting the wrong mix of light.`,
+              ? "Path is valid — channel is wrong. One target receives light but rejects the mix."
+              : `Path is valid — channel is wrong. ${misrouted} targets receive light but reject the mix.`,
         }
       : solvedCount
         ? {
             tone: "mid" as const,
-            text: `${solvedCount} of ${targetCount} lit — keep routing.`,
+            text: `${solvedCount} of ${targetCount} accepted. The rest receive nothing yet — that is a path problem.`,
           }
         : {
             tone: "mid" as const,
             text: "No light is landing yet. Follow the beam and find the first turn.",
           };
+
+
 
   const fade = rm
     ? { initial: false as const, animate: { opacity: 1 }, transition: { duration: 0 } }
@@ -587,6 +667,16 @@ function LevelScreen({ levelId }: { levelId: string }) {
               )}
             </AnimatePresence>
 
+            <LawsRail discovered={discovered} reduceMotion={rm} />
+
+            {!game.result.solved && (
+              <DirectorPanel
+                decision={decision}
+                reduceMotion={rm}
+                onRequestSolution={() => setSolutionRequested(true)}
+              />
+            )}
+
             <AnimatePresence initial={false}>
               {(hintLevel > 0 || game.struggling) && !game.result.solved && (
                 <motion.div
@@ -608,6 +698,8 @@ function LevelScreen({ levelId }: { levelId: string }) {
                 </motion.div>
               )}
             </AnimatePresence>
+
+
 
             {/* Everything below is secondary: it stays one tab-stop away but
                 never competes with the board for attention. */}

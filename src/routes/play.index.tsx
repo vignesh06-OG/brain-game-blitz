@@ -6,6 +6,9 @@ import { AchievementsPanel } from "@/components/game/AchievementsPanel";
 import { loadUnlocked } from "@/game/achievements";
 import { CHAPTERS, LEVELS } from "@/game/levels";
 import { loadProgress } from "@/game/progress";
+import { loadDiscovered } from "@/game/discoveries";
+import { LightLabComplete } from "@/components/game/LightLabComplete";
+
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/play/")({
@@ -30,10 +33,14 @@ export const Route = createFileRoute("/play/")({
 function LevelSelect() {
   const [progress, setProgress] = useState<Record<string, number>>({});
   const [unlocked, setUnlocked] = useState<string[]>([]);
+  const [discovered, setDiscovered] = useState<string[]>([]);
   useEffect(() => {
     setProgress(loadProgress());
     setUnlocked(loadUnlocked());
+    setDiscovered(loadDiscovered());
   }, []);
+
+  const campaignComplete = LEVELS.every((l) => progress[l.id] !== undefined);
 
   return (
     <main className="min-h-dvh aurora px-6 py-14">
@@ -48,6 +55,15 @@ function LevelSelect() {
         <p className="mt-2 text-muted-foreground">
           Solved {Object.keys(progress).length} of {LEVELS.length}
         </p>
+
+        {campaignComplete ? (
+          <LightLabComplete
+            progress={progress}
+            discovered={discovered}
+            className="mt-6"
+          />
+        ) : null}
+
 
         <div className="mt-4 flex flex-wrap gap-2">
           <Link
