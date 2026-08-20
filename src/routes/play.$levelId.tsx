@@ -214,8 +214,12 @@ function LevelScreen({ levelId }: { levelId: string }) {
     // level ships with — the player has to have changed something.
     if (game.moves === 0) return;
     const fresh = recordDiscoveries(detect(game.result, game.board));
-    if (fresh.length) setFreshDiscoveries((prev) => [...prev, ...fresh]);
+    if (fresh.length) {
+      setFreshDiscoveries((prev) => [...prev, ...fresh]);
+      setDiscovered((prev) => [...prev, ...fresh]);
+    }
   }, [game.result, game.board, game.moves]);
+
 
   // The model commits to a prediction before the attempt, so the calibration
   // ledger compares a real forecast against a real outcome.
