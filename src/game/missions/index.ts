@@ -143,7 +143,7 @@ const kingfisherMission: Mission = {
       : {
           solved: false,
           kind: "angle",
-          message: "Over-corrected. You land short of the fish.",
+          message: "Too shallow an angle — you land short of the fish.",
         };
   },
   hints: [
