@@ -23,8 +23,10 @@ import { MasterIntro } from "@/components/game/MasterIntro";
 import { PrincipleReveal } from "@/components/game/PrincipleReveal";
 import { CommentaryPanel } from "@/components/game/CommentaryPanel";
 import { DiscoveryToast } from "@/components/game/DiscoveryToast";
+import { LawsRail } from "@/components/game/LawsRail";
 import { PrismBoard } from "@/components/game/PrismBoard";
 import { CoachPanel } from "@/components/photonmind/CoachPanel";
+import { DirectorPanel } from "@/components/photonmind/DirectorPanel";
 import { SolveTimeline } from "@/components/game/SolveTimeline";
 import { evaluate, type Achievement } from "@/game/achievements";
 import { setAudioEnabled } from "@/game/audio";
@@ -32,15 +34,24 @@ import { useAdaptiveAudio } from "@/game/useAdaptiveAudio";
 import { colorGlyph, colorName, trace } from "@/game/engine";
 import { getLevel, nextLevel } from "@/game/levels";
 import { loadPrefs, recordSolve, savePrefs } from "@/game/progress";
-import { detect, loadDepth, recordDiscoveries, saveDepth, type Depth } from "@/game/discoveries";
+import {
+  detect,
+  loadDepth,
+  loadDiscovered,
+  recordDiscoveries,
+  saveDepth,
+  type Depth,
+} from "@/game/discoveries";
 import { previewMove, useGame } from "@/game/useGame";
 import { usePlayerModel } from "@/game/photonmind/usePlayerModel";
+import { direct } from "@/game/photonmind/director";
 import { predict } from "@/game/photonmind/predict";
 import { forwardBiasOf, recordSolveRow } from "@/game/photonmind/calibration";
 import { analyse } from "@/game/analysis";
 import type { Board } from "@/game/types";
 import type { Level, Piece } from "@/game/types";
 import { cn } from "@/lib/utils";
+
 
 
 export const Route = createFileRoute("/play/$levelId")({
@@ -145,15 +156,33 @@ function LevelScreen({ levelId }: { levelId: string }) {
   const [hoverCell, setHoverCell] = useState<string | null>(null);
   const [depth, setDepth] = useState<Depth>("beginner");
   const [freshDiscoveries, setFreshDiscoveries] = useState<string[]>([]);
+  const [discovered, setDiscovered] = useState<string[]>([]);
+  // Director telemetry that the game loop does not already track.
+  const [resets, setResets] = useState(0);
+  const [solutionRequested, setSolutionRequested] = useState(false);
+  const [idleMs, setIdleMs] = useState(0);
+  const lastMoveAt = useRef(Date.now());
   const next = nextLevel(levelId);
   const rm = prefs.reduceMotion;
 
   useEffect(() => {
     setPrefs(loadPrefs());
     setDepth(loadDepth());
+    setDiscovered(loadDiscovered());
   }, []);
 
+  // Idle clock — coarse on purpose: the director only needs tens of seconds,
+  // and a slow tick keeps this off the interaction path.
+  useEffect(() => {
+    lastMoveAt.current = Date.now();
+    setIdleMs(0);
+    if (game.result.solved) return;
+    const id = window.setInterval(() => setIdleMs(Date.now() - lastMoveAt.current), 5_000);
+    return () => window.clearInterval(id);
+  }, [game.moves, game.result.solved]);
+
   useAdaptiveAudio(game.result, game.litKeys.length, audioOn);
+
 
   /**
    * "What if?" — trace the board the hovered move *would* produce and show it
