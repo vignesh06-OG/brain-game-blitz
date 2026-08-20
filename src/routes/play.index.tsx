@@ -32,6 +32,8 @@ export const Route = createFileRoute("/play/")({
 });
 
 const TOOLS = [
+  { to: "/missions", label: "Field missions" },
+  { to: "/profile", label: "My Light" },
   { to: "/discoveries", label: "Discovery journal" },
   { to: "/intelligence", label: "Intelligence Lab" },
   { to: "/lab", label: "Light Laboratory" },
