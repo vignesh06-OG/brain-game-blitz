@@ -317,7 +317,10 @@ function LevelScreen({ levelId }: { levelId: string }) {
     player.clear();
     setCelebrated(false);
     setNudgeDismissed(false);
+    setResets((r) => r + 1);
+    setSolutionRequested(false);
   }, [game, player]);
+
 
   // Keyboard shortcuts — desktop players never have to reach for the mouse.
   useEffect(() => {
