@@ -878,7 +878,7 @@ function LevelScreen({ levelId }: { levelId: string }) {
 
       <MasterIntro open={introOpen} onDone={() => setIntroOpen(false)} reduceMotion={rm} />
 
-      <AchievementToast unlocked={unlocked} reduceMotion={rm} />
+      <AchievementToast unlocked={unlocked} reduceMotion={rm} overlayOpen={game.result.solved} />
 
       <DiscoveryToast
         ids={freshDiscoveries}

@@ -134,7 +134,7 @@ export function ValidationModal({ analysis, running, onClose, reduceMotion }: Pr
                 <div className="mt-5">
                   <div className="mb-1.5 flex items-center justify-between text-xs text-muted-foreground">
                     <span className="inline-flex items-center gap-1.5">
-                      <Gauge className="h-3.5 w-3.5" aria-hidden="true" /> Model confidence
+                      <Gauge className="h-3.5 w-3.5" aria-hidden="true" /> Search completeness
                     </span>
                     <span className="tabular-nums">
                       {Math.round(analysis.confidence * 100)}%
@@ -146,7 +146,7 @@ export function ValidationModal({ analysis, running, onClose, reduceMotion }: Pr
                     aria-valuenow={Math.round(analysis.confidence * 100)}
                     aria-valuemin={0}
                     aria-valuemax={100}
-                    aria-label="Difficulty model confidence"
+                    aria-label="Search completeness"
                   >
                     <motion.div
                       className="h-full rounded-full bg-primary"
