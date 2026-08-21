@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState, type ReactNode } from "react";
 import { Film, Star, Trophy } from "lucide-react";
 import { ReplayTimeline } from "@/components/game/ReplayTimeline";
+import type { Lesson } from "@/game/lessons";
 import type { Board } from "@/game/types";
 import { cn } from "@/lib/utils";
 
@@ -14,6 +15,8 @@ interface Props {
   frames: Board[];
   colorblind: boolean;
   reduceMotion?: boolean;
+  /** One concept, taken from what the player just did. Never a paragraph. */
+  lesson?: Lesson | undefined;
   actions: ReactNode;
 }
 
