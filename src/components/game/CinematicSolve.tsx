@@ -195,6 +195,31 @@ export function CinematicSolve({
                   ))}
                 </dl>
 
+                {/* One concept, tied to the move the player just made. */}
+                {lesson && (
+                  <div className="mt-4 border-t border-[var(--hairline)] pt-4 text-left">
+                    <p className="text-[0.6rem] tracking-[0.22em] text-muted-foreground uppercase">
+                      Light concept
+                    </p>
+                    <p className="mt-1 font-display text-base font-bold text-primary">
+                      {lesson.concept}
+                    </p>
+                    <p className="mt-1.5 text-[0.8125rem] leading-relaxed text-muted-foreground">
+                      {lesson.statement}
+                    </p>
+                    {lesson.discoveredBy && (
+                      <>
+                        <p className="mt-3 text-[0.6rem] tracking-[0.22em] text-muted-foreground uppercase">
+                          Established by
+                        </p>
+                        <p className="text-[0.8125rem]">{lesson.discoveredBy}</p>
+                      </>
+                    )}
+                  </div>
+                )}
+
+
+
 
                 <div className="mt-5 flex justify-center gap-1 rounded-full border border-border bg-surface-2/70 p-1 text-xs">
                   {(["summary", "replay"] as const).map((t) => (
