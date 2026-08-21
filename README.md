@@ -186,7 +186,7 @@ bun run preview  # serve the production build
 
 ### Live demo
 
-(https://brain-game-blitz.vercel.app/)
+**https://brain-game-blitz.vercel.app/** — the deployed production build.
 
 ## AI-assisted development
 
