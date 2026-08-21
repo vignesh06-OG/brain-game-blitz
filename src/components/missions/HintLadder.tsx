@@ -44,13 +44,19 @@ export function HintLadder({
       </ol>
 
       {remaining > 0 ? (
-        <button
-          type="button"
-          onClick={onReveal}
-          className="mt-3 inline-flex min-h-11 items-center rounded-sm border border-primary/30 px-3 text-[0.8125rem] text-primary transition-colors hover:bg-primary/10"
-        >
-          {used === 0 ? "Ask PhotonMind" : "One more rung"}
-        </button>
+        <>
+          <button
+            type="button"
+            onClick={onReveal}
+            className="mt-3 inline-flex min-h-11 items-center rounded-sm border border-primary/30 px-3 text-[0.8125rem] text-primary transition-colors hover:bg-primary/10"
+          >
+            {used === 0 ? "Ask PhotonMind" : "One more rung"}
+          </button>
+          {/* Stated up front: a hint is a trade, never a penalty for trying. */}
+          <p className="mt-2 text-[0.6875rem] text-muted-foreground">
+            Each rung costs 12 discovery score. The solve still counts either way.
+          </p>
+        </>
       ) : (
         <p className="mt-3 text-xs text-muted-foreground">
           Every rung is open. The reasoning is still yours to finish.
