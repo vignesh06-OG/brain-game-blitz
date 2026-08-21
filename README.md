@@ -177,7 +177,7 @@ bun run preview  # serve the production build
 
 ### Live demo
 
-**Coming soon.**
+(https://vercel.com/vignesh06-ogs-projects/brain-game-blitz)
 
 ## AI-assisted development
 
