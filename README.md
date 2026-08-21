@@ -121,7 +121,7 @@ PhotonMind is a distillation experiment, not an oracle. Read it that way.
 ```
 React 19  ·  TanStack Start + TanStack Router
         │
-Game state  (Zustand-style stores, localStorage persistence)
+Game state  (React stores, localStorage persistence)
         │
 Deterministic beam engine        src/game/engine.ts
         │
