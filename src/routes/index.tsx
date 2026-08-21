@@ -74,14 +74,36 @@ function Landing() {
             <Etch>Prism · optical logic</Etch>
           </motion.div>
 
-          <motion.h1
-            variants={rise}
-            className="mt-5 font-display text-[clamp(2.75rem,7vw,4.5rem)] leading-[0.92] font-extrabold tracking-[-0.03em]"
-          >
-            Light is the
-            <br />
-            <span className="text-primary text-glow">only</span> mechanic.
-          </motion.h1>
+          {/* Power-on: one beam sweeps the title and leaves it lit. It runs
+              once, occupies no layout box, and is skipped entirely for
+              reduced-motion visitors — who simply arrive to a lit headline. */}
+          <motion.div variants={rise} className="relative mt-5">
+            <motion.h1
+              className="font-display text-[clamp(2.75rem,7vw,4.5rem)] leading-[0.92] font-extrabold tracking-[-0.03em]"
+              initial={reduceMotion ? false : { opacity: 0.32 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.42, ease: "easeOut" }}
+            >
+              Light is the
+              <br />
+              <span className="text-primary text-glow">only</span> mechanic.
+            </motion.h1>
+
+            {!reduceMotion && (
+              <motion.span
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-y-0 w-[22%] mix-blend-screen"
+                style={{
+                  background:
+                    "linear-gradient(90deg, transparent, color-mix(in oklab, var(--primary) 55%, transparent), transparent)",
+                  filter: "blur(6px)",
+                }}
+                initial={{ left: "-25%", opacity: 0 }}
+                animate={{ left: ["-25%", "105%"], opacity: [0, 1, 1, 0] }}
+                transition={{ duration: 0.9, delay: 0.15, ease: "easeInOut" }}
+              />
+            )}
+          </motion.div>
 
           {/* A fibre, not a divider: the rule under the title is the same
               material as the beams on the board. */}
