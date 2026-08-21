@@ -33,6 +33,7 @@ import { evaluate, type Achievement } from "@/game/achievements";
 import { setAudioEnabled } from "@/game/audio";
 import { useAdaptiveAudio } from "@/game/useAdaptiveAudio";
 import { colorGlyph, colorName, trace } from "@/game/engine";
+import { getLesson } from "@/game/lessons";
 import { getLevel, nextLevel } from "@/game/levels";
 import { loadPrefs, recordSolve, savePrefs } from "@/game/progress";
 import {
@@ -899,6 +900,7 @@ function LevelScreen({ levelId }: { levelId: string }) {
         frames={game.timeline}
         colorblind={prefs.colorblind}
         reduceMotion={rm}
+        lesson={getLesson(level.id)}
         actions={
           <>
             {level.reveal ? (
