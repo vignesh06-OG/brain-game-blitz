@@ -38,3 +38,5 @@ dist-ssr
 
 # Build info
 tsconfig.tsbuildinfo
+
+.lovable/

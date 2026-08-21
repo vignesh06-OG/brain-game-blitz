@@ -5,17 +5,24 @@ import type { Achievement } from "@/game/achievements";
 interface Props {
   unlocked: Achievement[];
   reduceMotion?: boolean;
+  /** True while a full-screen victory overlay owns the moment. */
+  overlayOpen?: boolean;
 }
 
 /** Slides in newly earned mastery badges without interrupting play. */
-export function AchievementToast({ unlocked, reduceMotion = false }: Props) {
+export function AchievementToast({ unlocked, reduceMotion = false, overlayOpen = false }: Props) {
+  // Narrow screens cannot host both the solve card and a badge stack; the
+  // badges stay recorded and remain visible in the profile and badge panel.
+  const visible = unlocked.slice(-2);
   return (
     <div
-      className="pointer-events-none fixed right-4 top-4 z-40 flex w-[min(20rem,calc(100vw-2rem))] flex-col gap-2"
+      className={`pointer-events-none fixed right-4 top-4 z-40 flex w-[min(20rem,calc(100vw-2rem))] flex-col gap-2 ${
+        overlayOpen ? "max-md:hidden" : ""
+      }`}
       aria-live="polite"
     >
       <AnimatePresence initial={false}>
-        {unlocked.map((a, i) => (
+        {visible.map((a, i) => (
           <motion.div
             key={a.id}
             initial={reduceMotion ? false : { opacity: 0, x: 40, scale: 0.95 }}

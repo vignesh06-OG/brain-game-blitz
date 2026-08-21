@@ -116,7 +116,14 @@ const kingfisherMission: Mission = {
     return [
       { label: "θ₁ in air", value: `${round(aim)}°` },
       { label: "θ₂ in water", value: `${round(k.t2 * DEG)}°` },
-      { label: "Strike lands", value: `${miss > 0 ? "+" : ""}${round(miss)} beyond fish`, tone: Math.abs(miss) <= 1 ? "ok" : "warn" },
+      {
+        label: "Strike lands",
+        value:
+          Math.abs(miss) <= 1
+            ? "on the fish"
+            : `${round(Math.abs(miss))} ${miss > 0 ? "beyond" : "short of"} fish`,
+        tone: Math.abs(miss) <= 1 ? "ok" : "warn",
+      },
     ];
   },
   evaluate: (aim) => {
