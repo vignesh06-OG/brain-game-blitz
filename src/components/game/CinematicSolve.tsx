@@ -35,6 +35,7 @@ export function CinematicSolve({
   frames,
   colorblind,
   reduceMotion = false,
+  lesson,
   actions,
 }: Props) {
   const [phase, setPhase] = useState<"bloom" | "card">(reduceMotion ? "card" : "bloom");
