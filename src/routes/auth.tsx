@@ -36,7 +36,38 @@ export const Route = createFileRoute("/auth")({
   component: AuthPage,
 });
 
+/**
+ * Accounts are optional: the whole game runs signed out. On deployments where
+ * the backend keys are not configured, show a calm explanation instead of
+ * letting the client throw.
+ */
+const accountsAvailable = Boolean(
+  import.meta.env['VITE_SUPABASE_URL'] && import.meta.env['VITE_SUPABASE_PUBLISHABLE_KEY'],
+);
+
+function AccountsUnavailable() {
+  return (
+    <main className="min-h-screen flex items-center justify-center px-6 py-16">
+      <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-white/[0.03] p-8 text-center backdrop-blur">
+        <h1 className="text-2xl font-semibold tracking-tight text-glow">Accounts are off in this build</h1>
+        <p className="mt-3 text-sm text-muted-foreground">
+          Optional accounts only sync progress across devices. Every puzzle, field mission and
+          laboratory tool is fully playable signed out — your progress is saved on this device.
+        </p>
+        <Button asChild className="mt-6 w-full">
+          <a href="/play">Start playing</a>
+        </Button>
+      </div>
+    </main>
+  );
+}
+
 function AuthPage() {
+  if (!accountsAvailable) return <AccountsUnavailable />;
+  return <AuthForm />;
+}
+
+function AuthForm() {
   const { next } = Route.useSearch();
   const navigate = useNavigate();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
