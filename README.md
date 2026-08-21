@@ -6,9 +6,18 @@
 filters until every target burns the exact colour it asks for — on a deterministic optical
 simulation, with no lives, no timers and no luck.
 
+### [▶ PLAY PRISM — brain-game-blitz.vercel.app](https://brain-game-blitz.vercel.app/)
+
+[![Play Prism](https://img.shields.io/badge/▶%20PLAY%20PRISM-live%20build-0ea5e9?style=for-the-badge)](https://brain-game-blitz.vercel.app/)
+[![Source code](https://img.shields.io/badge/SOURCE%20CODE-GitHub-111528?style=for-the-badge&logo=github)](https://github.com/vignesh06-OG/brain-game-blitz)
+
+**Live demo** · https://brain-game-blitz.vercel.app/
+**Source code** · https://github.com/vignesh06-OG/brain-game-blitz
+
 </div>
 
 ---
+
 
 <img src="docs/assets/gameplay.png" alt="A Prism puzzle: an emitter, a mirror and an unlit target on the optical bench" width="100%">
 
