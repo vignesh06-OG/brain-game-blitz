@@ -144,6 +144,7 @@ const kingfisherMission: Mission = {
           solved: false,
           kind: "angle",
           message: "Too shallow an angle — you land short of the fish.",
+          why: "Opening the angle moves the entry point along the surface, and the bent leg underwater carries the strike further out.",
         };
   },
   hints: [
