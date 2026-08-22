@@ -508,7 +508,7 @@ function LevelScreen({ levelId }: { levelId: string }) {
         className="relative z-10 mx-auto w-full max-w-[76rem] shrink-0"
       />
 
-      <div className="relative z-10 mx-auto grid min-h-0 w-full max-w-[76rem] flex-1 grid-cols-1 gap-x-7 gap-y-6 py-4 bench:my-auto bench:max-h-[54rem] bench:grid-cols-[minmax(0,1fr)_17.5rem]">
+      <div className="relative z-10 mx-auto grid min-h-0 w-full max-w-[76rem] flex-1 grid-cols-1 gap-x-7 gap-y-6 py-4 bench:my-auto bench:max-h-[54rem] bench:grid-cols-[minmax(0,1fr)_17.5rem] bench:grid-rows-[minmax(0,1fr)]">
         {/* The board owns every spare pixel of the chamber: it grows into tall
             viewports instead of floating in dead air. */}
         <motion.div {...fade} className="flex min-h-0 min-w-0 flex-col gap-3">
@@ -604,7 +604,7 @@ function LevelScreen({ levelId }: { levelId: string }) {
             deliberately not a column of cards. */}
         <motion.aside
           {...fade}
-          className="grid min-h-0 gap-x-9 gap-y-4 sm:grid-cols-2 bench:flex bench:flex-col bench:gap-3.5 bench:overflow-y-auto bench:border-l bench:border-[var(--hairline)] bench:pl-6"
+          className="grid min-h-0 gap-x-9 gap-y-4 sm:grid-cols-2 bench:flex bench:h-full bench:min-h-0 bench:flex-col bench:gap-3.5 bench:overflow-x-hidden bench:overflow-y-auto bench:overscroll-contain bench:border-l bench:border-[var(--hairline)] bench:pb-4 bench:pl-6 bench:[&>*]:shrink-0"
         >
           <div className="grid grid-cols-2 gap-1.5">
             <button
