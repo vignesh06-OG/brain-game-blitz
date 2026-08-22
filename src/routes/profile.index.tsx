@@ -3,6 +3,7 @@ import { ArrowLeft } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Etch, RailSection } from "@/components/chrome/instrument";
 import { LEVELS } from "@/game/levels";
+import { computeMastery } from "@/game/mastery";
 import { loadProgress } from "@/game/progress";
 import { readLaws } from "@/game/lightlaws";
 import { loadDiscovered } from "@/game/discoveries";
@@ -85,6 +86,8 @@ function Profile() {
   const known = laws.filter((l) => l.known).length;
   const solved = LEVELS.filter((l) => progress[l.id] !== undefined).length;
   const atPar = LEVELS.filter((l) => progress[l.id] !== undefined && progress[l.id]! <= l.par).length;
+  const mastery = computeMastery(progress);
+  const masteryDone = mastery.filter((m) => m.complete).length;
   const broken = streakBroken(streak);
   const shownStreak = broken ? 0 : streak.current;
 
@@ -165,6 +168,36 @@ function Profile() {
                   </dd>
                 </div>
               </dl>
+            </RailSection>
+
+            <RailSection label="Mastery" meta={`${masteryDone}/${mastery.length}`}>
+              <ul className="space-y-2.5">
+                {mastery.map((m) => (
+                  <li key={m.id}>
+                    <div className="flex items-baseline justify-between gap-3 text-sm">
+                      <span className={cn("truncate", m.complete && "text-primary")}>
+                        {m.title}
+                      </span>
+                      <span className="font-display text-xs tabular-nums text-muted-foreground">
+                        {m.done}/{m.total}
+                      </span>
+                    </div>
+                    <div
+                      className="mt-1 h-1 overflow-hidden rounded-full bg-surface-2"
+                      role="progressbar"
+                      aria-label={m.detail}
+                      aria-valuenow={m.done}
+                      aria-valuemin={0}
+                      aria-valuemax={m.total}
+                    >
+                      <div
+                        className={cn("h-full rounded-full", m.complete ? "bg-primary" : "bg-accent/60")}
+                        style={{ width: `${Math.round((m.done / Math.max(1, m.total)) * 100)}%` }}
+                      />
+                    </div>
+                  </li>
+                ))}
+              </ul>
             </RailSection>
 
             <RailSection
