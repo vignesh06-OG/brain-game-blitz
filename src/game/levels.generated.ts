@@ -1,13 +1,12 @@
 /**
  * GENERATED BOARDS — do not hand-edit.
  *
- * Every board here was produced by a constructive generator (a guaranteed
- * solution path is built first, then mirrors are scrambled) and then
- * re-verified independently by the BFS solver in src/game/analysis.ts:
- * the recorded par equals the solver's exhaustive minimum-move count and
- * `solutions` is its optimal-solution count. Regenerating is the only
- * supported way to change them; scripts/validate-levels.ts re-checks every
- * board on every run.
+ * Each board was produced by a constructive generator (a guaranteed solution
+ * path is laid down first, then mirrors are scrambled) and then re-verified
+ * independently by the exhaustive BFS solver in src/game/analysis.ts. The
+ * recorded par is that solver's minimum-move count and `solutions` is its
+ * count of distinct optimal solutions. scripts/validate-levels.ts re-checks
+ * every board on every run.
  */
 import type { Board, Piece } from "./types";
 
@@ -28,20 +27,9 @@ const gen = (s: GenSpec): Board => ({
   tray: (s.tray ?? []).map(mk),
 });
 
-/** id -> solver-verified board. */
+/** Level id -> solver-verified board. */
 export const GENERATED: Record<string, Board> = {
   "1-4": gen({
-    width: 7,
-    height: 8,
-    cells: [
-      ["4,0", { kind: "mirror", rot: 0 }],
-      ["4,4", { kind: "mirror", rot: 0 }],
-      ["6,4", { kind: "mirror", rot: 1 }],
-      ["6,7", { kind: "target", rot: 0, color: 7, fixed: true }],
-      ["0,0", { kind: "emitter", rot: 1, color: 7, fixed: true }],
-    ],
-  }),
-  "1-5": gen({
     width: 5,
     height: 7,
     cells: [
@@ -52,6 +40,17 @@ export const GENERATED: Record<string, Board> = {
       ["4,6", { kind: "emitter", rot: 3, color: 7, fixed: true }],
       ["1,5", { kind: "wall", rot: 0, fixed: true }],
       ["3,2", { kind: "wall", rot: 0, fixed: true }],
+    ],
+  }),
+  "1-5": gen({
+    width: 7,
+    height: 8,
+    cells: [
+      ["4,0", { kind: "mirror", rot: 0 }],
+      ["4,4", { kind: "mirror", rot: 0 }],
+      ["6,4", { kind: "mirror", rot: 1 }],
+      ["6,7", { kind: "target", rot: 0, color: 7, fixed: true }],
+      ["0,0", { kind: "emitter", rot: 1, color: 7, fixed: true }],
     ],
   }),
   "1-6": gen({
@@ -95,19 +94,6 @@ export const GENERATED: Record<string, Board> = {
   }),
   "2-4": gen({
     width: 8,
-    height: 8,
-    cells: [
-      ["5,5", { kind: "splitter", rot: 1, fixed: true }],
-      ["3,5", { kind: "mirror", rot: 0 }],
-      ["3,1", { kind: "target", rot: 0, color: 7, fixed: true }],
-      ["5,2", { kind: "mirror", rot: 1 }],
-      ["7,2", { kind: "mirror", rot: 1 }],
-      ["7,4", { kind: "target", rot: 0, color: 7, fixed: true }],
-      ["7,5", { kind: "emitter", rot: 3, color: 7, fixed: true }],
-    ],
-  }),
-  "2-5": gen({
-    width: 8,
     height: 7,
     cells: [
       ["2,6", { kind: "splitter", rot: 0, fixed: true }],
@@ -120,7 +106,49 @@ export const GENERATED: Record<string, Board> = {
       ["0,6", { kind: "emitter", rot: 1, color: 7, fixed: true }],
     ],
   }),
+  "2-5": gen({
+    width: 8,
+    height: 7,
+    cells: [
+      ["3,2", { kind: "prism", rot: 0, fixed: true }],
+      ["7,2", { kind: "mirror", rot: 1 }],
+      ["7,0", { kind: "target", rot: 0, color: 1, fixed: true }],
+      ["3,0", { kind: "mirror", rot: 0 }],
+      ["6,0", { kind: "target", rot: 0, color: 2, fixed: true }],
+      ["3,6", { kind: "mirror", rot: 0 }],
+      ["5,6", { kind: "target", rot: 0, color: 4, fixed: true }],
+      ["0,2", { kind: "emitter", rot: 1, color: 7, fixed: true }],
+    ],
+  }),
   "2-6": gen({
+    width: 8,
+    height: 8,
+    cells: [
+      ["5,5", { kind: "splitter", rot: 1, fixed: true }],
+      ["3,5", { kind: "mirror", rot: 0 }],
+      ["3,1", { kind: "target", rot: 0, color: 7, fixed: true }],
+      ["5,2", { kind: "mirror", rot: 1 }],
+      ["7,2", { kind: "mirror", rot: 1 }],
+      ["7,4", { kind: "target", rot: 0, color: 7, fixed: true }],
+      ["7,5", { kind: "emitter", rot: 3, color: 7, fixed: true }],
+    ],
+  }),
+  "2-7": gen({
+    width: 9,
+    height: 9,
+    cells: [
+      ["4,6", { kind: "mirror", rot: 0 }],
+      ["4,8", { kind: "mirror", rot: 1 }],
+      ["2,8", { kind: "mirror", rot: 0 }],
+      ["3,4", { kind: "target", rot: 0, color: 7, fixed: true }],
+      ["8,6", { kind: "emitter", rot: 3, color: 7, fixed: true }],
+      ["0,1", { kind: "wall", rot: 0, fixed: true }],
+    ],
+    tray: [
+      { kind: "mirror", rot: 0 },
+    ],
+  }),
+  "2-8": gen({
     width: 9,
     height: 9,
     cells: [
@@ -136,21 +164,7 @@ export const GENERATED: Record<string, Board> = {
       ["8,5", { kind: "emitter", rot: 3, color: 7, fixed: true }],
     ],
   }),
-  "2-7": gen({
-    width: 8,
-    height: 7,
-    cells: [
-      ["3,2", { kind: "prism", rot: 0, fixed: true }],
-      ["7,2", { kind: "mirror", rot: 1 }],
-      ["7,0", { kind: "target", rot: 0, color: 1, fixed: true }],
-      ["3,0", { kind: "mirror", rot: 0 }],
-      ["6,0", { kind: "target", rot: 0, color: 2, fixed: true }],
-      ["3,6", { kind: "mirror", rot: 0 }],
-      ["5,6", { kind: "target", rot: 0, color: 4, fixed: true }],
-      ["0,2", { kind: "emitter", rot: 1, color: 7, fixed: true }],
-    ],
-  }),
-  "2-8": gen({
+  "2-9": gen({
     width: 7,
     height: 7,
     cells: [
@@ -165,22 +179,21 @@ export const GENERATED: Record<string, Board> = {
       ["0,5", { kind: "emitter", rot: 1, color: 7, fixed: true }],
     ],
   }),
-  "2-9": gen({
+  "3-4": gen({
     width: 9,
     height: 9,
     cells: [
-      ["4,6", { kind: "mirror", rot: 0 }],
-      ["4,8", { kind: "mirror", rot: 1 }],
-      ["2,8", { kind: "mirror", rot: 0 }],
-      ["3,4", { kind: "target", rot: 0, color: 7, fixed: true }],
-      ["8,6", { kind: "emitter", rot: 3, color: 7, fixed: true }],
-      ["0,1", { kind: "wall", rot: 0, fixed: true }],
+      ["7,4", { kind: "mirror", rot: 0 }],
+      ["7,6", { kind: "mirror", rot: 1 }],
+      ["3,6", { kind: "mirror", rot: 0 }],
+      ["4,3", { kind: "target", rot: 0, color: 7, fixed: true }],
+      ["8,4", { kind: "emitter", rot: 3, color: 7, fixed: true }],
     ],
     tray: [
       { kind: "mirror", rot: 0 },
     ],
   }),
-  "3-4": gen({
+  "3-5": gen({
     width: 8,
     height: 7,
     cells: [
@@ -194,7 +207,7 @@ export const GENERATED: Record<string, Board> = {
       ["7,2", { kind: "emitter", rot: 3, color: 7, fixed: true }],
     ],
   }),
-  "3-5": gen({
+  "3-6": gen({
     width: 8,
     height: 7,
     cells: [
@@ -209,35 +222,7 @@ export const GENERATED: Record<string, Board> = {
       ["6,3", { kind: "wall", rot: 0, fixed: true }],
     ],
   }),
-  "3-6": gen({
-    width: 9,
-    height: 9,
-    cells: [
-      ["7,4", { kind: "mirror", rot: 0 }],
-      ["7,6", { kind: "mirror", rot: 1 }],
-      ["3,6", { kind: "mirror", rot: 0 }],
-      ["4,3", { kind: "target", rot: 0, color: 7, fixed: true }],
-      ["8,4", { kind: "emitter", rot: 3, color: 7, fixed: true }],
-    ],
-    tray: [
-      { kind: "mirror", rot: 0 },
-    ],
-  }),
   "3-7": gen({
-    width: 9,
-    height: 8,
-    cells: [
-      ["2,7", { kind: "splitter", rot: 0, fixed: true }],
-      ["3,7", { kind: "mirror", rot: 1 }],
-      ["3,5", { kind: "mirror", rot: 0 }],
-      ["2,5", { kind: "target", rot: 0, color: 7, fixed: true }],
-      ["2,6", { kind: "mirror", rot: 0 }],
-      ["1,6", { kind: "mirror", rot: 0 }],
-      ["1,4", { kind: "target", rot: 0, color: 7, fixed: true }],
-      ["0,7", { kind: "emitter", rot: 1, color: 7, fixed: true }],
-    ],
-  }),
-  "3-8": gen({
     width: 9,
     height: 9,
     cells: [
@@ -253,6 +238,20 @@ export const GENERATED: Record<string, Board> = {
       ["0,1", { kind: "emitter", rot: 1, color: 7, fixed: true }],
       ["1,7", { kind: "wall", rot: 0, fixed: true }],
       ["6,3", { kind: "wall", rot: 0, fixed: true }],
+    ],
+  }),
+  "3-8": gen({
+    width: 9,
+    height: 8,
+    cells: [
+      ["2,7", { kind: "splitter", rot: 0, fixed: true }],
+      ["3,7", { kind: "mirror", rot: 1 }],
+      ["3,5", { kind: "mirror", rot: 0 }],
+      ["2,5", { kind: "target", rot: 0, color: 7, fixed: true }],
+      ["2,6", { kind: "mirror", rot: 0 }],
+      ["1,6", { kind: "mirror", rot: 0 }],
+      ["1,4", { kind: "target", rot: 0, color: 7, fixed: true }],
+      ["0,7", { kind: "emitter", rot: 1, color: 7, fixed: true }],
     ],
   }),
   "3-9": gen({
@@ -320,6 +319,20 @@ export const GENERATED: Record<string, Board> = {
     width: 9,
     height: 8,
     cells: [
+      ["4,1", { kind: "mirror", rot: 1 }],
+      ["4,4", { kind: "mirror", rot: 0 }],
+      ["8,4", { kind: "mirror", rot: 0 }],
+      ["4,7", { kind: "target", rot: 0, color: 7, fixed: true }],
+      ["8,1", { kind: "emitter", rot: 3, color: 7, fixed: true }],
+    ],
+    tray: [
+      { kind: "mirror", rot: 0 },
+    ],
+  }),
+  "4-8": gen({
+    width: 9,
+    height: 8,
+    cells: [
       ["6,7", { kind: "splitter", rot: 1, fixed: true }],
       ["2,7", { kind: "mirror", rot: 0 }],
       ["2,5", { kind: "mirror", rot: 1 }],
@@ -332,7 +345,7 @@ export const GENERATED: Record<string, Board> = {
       ["6,1", { kind: "wall", rot: 0, fixed: true }],
     ],
   }),
-  "4-8": gen({
+  "4-9": gen({
     width: 9,
     height: 9,
     cells: [
@@ -347,21 +360,23 @@ export const GENERATED: Record<string, Board> = {
       ["0,5", { kind: "emitter", rot: 1, color: 7, fixed: true }],
     ],
   }),
-  "4-9": gen({
+  "5-2": gen({
     width: 9,
-    height: 8,
+    height: 9,
     cells: [
-      ["4,1", { kind: "mirror", rot: 1 }],
-      ["4,4", { kind: "mirror", rot: 0 }],
-      ["8,4", { kind: "mirror", rot: 0 }],
-      ["4,7", { kind: "target", rot: 0, color: 7, fixed: true }],
-      ["8,1", { kind: "emitter", rot: 3, color: 7, fixed: true }],
-    ],
-    tray: [
-      { kind: "mirror", rot: 0 },
+      ["5,7", { kind: "splitter", rot: 1, fixed: true }],
+      ["4,7", { kind: "filter", rot: 0, color: 2, fixed: true }],
+      ["0,7", { kind: "mirror", rot: 0 }],
+      ["0,5", { kind: "mirror", rot: 1 }],
+      ["3,5", { kind: "target", rot: 0, color: 2, fixed: true }],
+      ["5,5", { kind: "filter", rot: 0, color: 4, fixed: true }],
+      ["5,1", { kind: "mirror", rot: 0 }],
+      ["1,1", { kind: "mirror", rot: 1 }],
+      ["1,3", { kind: "target", rot: 0, color: 4, fixed: true }],
+      ["8,7", { kind: "emitter", rot: 3, color: 7, fixed: true }],
     ],
   }),
-  "5-2": gen({
+  "5-3": gen({
     width: 8,
     height: 9,
     cells: [
@@ -376,22 +391,6 @@ export const GENERATED: Record<string, Board> = {
       ["1,3", { kind: "target", rot: 0, color: 4, fixed: true }],
       ["7,4", { kind: "emitter", rot: 3, color: 7, fixed: true }],
       ["2,1", { kind: "wall", rot: 0, fixed: true }],
-    ],
-  }),
-  "5-3": gen({
-    width: 9,
-    height: 9,
-    cells: [
-      ["5,7", { kind: "splitter", rot: 1, fixed: true }],
-      ["4,7", { kind: "filter", rot: 0, color: 2, fixed: true }],
-      ["0,7", { kind: "mirror", rot: 0 }],
-      ["0,5", { kind: "mirror", rot: 1 }],
-      ["3,5", { kind: "target", rot: 0, color: 2, fixed: true }],
-      ["5,5", { kind: "filter", rot: 0, color: 4, fixed: true }],
-      ["5,1", { kind: "mirror", rot: 0 }],
-      ["1,1", { kind: "mirror", rot: 1 }],
-      ["1,3", { kind: "target", rot: 0, color: 4, fixed: true }],
-      ["8,7", { kind: "emitter", rot: 3, color: 7, fixed: true }],
     ],
   }),
   "5-4": gen({
@@ -413,22 +412,6 @@ export const GENERATED: Record<string, Board> = {
     ],
   }),
   "5-5": gen({
-    width: 7,
-    height: 8,
-    cells: [
-      ["3,6", { kind: "splitter", rot: 0, fixed: true }],
-      ["6,6", { kind: "mirror", rot: 1 }],
-      ["6,3", { kind: "mirror", rot: 0 }],
-      ["3,3", { kind: "target", rot: 0, color: 7, fixed: true }],
-      ["3,4", { kind: "mirror", rot: 0 }],
-      ["0,4", { kind: "mirror", rot: 0 }],
-      ["0,1", { kind: "mirror", rot: 1 }],
-      ["4,1", { kind: "target", rot: 0, color: 7, fixed: true }],
-      ["0,6", { kind: "emitter", rot: 1, color: 7, fixed: true }],
-      ["0,5", { kind: "wall", rot: 0, fixed: true }],
-    ],
-  }),
-  "5-6": gen({
     width: 9,
     height: 9,
     cells: [
@@ -444,23 +427,23 @@ export const GENERATED: Record<string, Board> = {
       ["0,4", { kind: "emitter", rot: 1, color: 7, fixed: true }],
     ],
   }),
-  "6-1": gen({
-    width: 8,
+  "5-6": gen({
+    width: 7,
     height: 8,
     cells: [
-      ["1,7", { kind: "mirror", rot: 1 }],
-      ["1,3", { kind: "mirror", rot: 0 }],
-      ["0,3", { kind: "target", rot: 0, color: 7, fixed: true }],
-      ["3,7", { kind: "mirror", rot: 0 }],
-      ["3,3", { kind: "mirror", rot: 0 }],
-      ["6,3", { kind: "target", rot: 0, color: 7, fixed: true }],
-      ["7,7", { kind: "emitter", rot: 3, color: 7, fixed: true }],
-      ["0,7", { kind: "emitter", rot: 1, color: 7, fixed: true }],
-      ["0,0", { kind: "wall", rot: 0, fixed: true }],
-      ["5,1", { kind: "wall", rot: 0, fixed: true }],
+      ["3,6", { kind: "splitter", rot: 0, fixed: true }],
+      ["6,6", { kind: "mirror", rot: 1 }],
+      ["6,3", { kind: "mirror", rot: 0 }],
+      ["3,3", { kind: "target", rot: 0, color: 7, fixed: true }],
+      ["3,4", { kind: "mirror", rot: 0 }],
+      ["0,4", { kind: "mirror", rot: 0 }],
+      ["0,1", { kind: "mirror", rot: 1 }],
+      ["4,1", { kind: "target", rot: 0, color: 7, fixed: true }],
+      ["0,6", { kind: "emitter", rot: 1, color: 7, fixed: true }],
+      ["0,5", { kind: "wall", rot: 0, fixed: true }],
     ],
   }),
-  "6-2": gen({
+  "6-1": gen({
     width: 9,
     height: 9,
     cells: [
@@ -477,7 +460,7 @@ export const GENERATED: Record<string, Board> = {
       ["3,1", { kind: "wall", rot: 0, fixed: true }],
     ],
   }),
-  "6-3": gen({
+  "6-2": gen({
     width: 7,
     height: 8,
     cells: [
@@ -492,23 +475,23 @@ export const GENERATED: Record<string, Board> = {
       ["0,5", { kind: "emitter", rot: 1, color: 7, fixed: true }],
     ],
   }),
-  "6-4": gen({
-    width: 9,
+  "6-3": gen({
+    width: 8,
     height: 8,
     cells: [
-      ["4,2", { kind: "mirror", rot: 0 }],
-      ["4,3", { kind: "mirror", rot: 1 }],
-      ["0,3", { kind: "mirror", rot: 1 }],
-      ["0,7", { kind: "target", rot: 0, color: 7, fixed: true }],
-      ["7,7", { kind: "mirror", rot: 1 }],
-      ["7,4", { kind: "mirror", rot: 0 }],
-      ["3,4", { kind: "target", rot: 0, color: 7, fixed: true }],
-      ["8,7", { kind: "emitter", rot: 3, color: 7, fixed: true }],
-      ["0,2", { kind: "emitter", rot: 1, color: 7, fixed: true }],
-      ["7,2", { kind: "wall", rot: 0, fixed: true }],
+      ["1,7", { kind: "mirror", rot: 1 }],
+      ["1,3", { kind: "mirror", rot: 0 }],
+      ["0,3", { kind: "target", rot: 0, color: 7, fixed: true }],
+      ["3,7", { kind: "mirror", rot: 0 }],
+      ["3,3", { kind: "mirror", rot: 0 }],
+      ["6,3", { kind: "target", rot: 0, color: 7, fixed: true }],
+      ["7,7", { kind: "emitter", rot: 3, color: 7, fixed: true }],
+      ["0,7", { kind: "emitter", rot: 1, color: 7, fixed: true }],
+      ["0,0", { kind: "wall", rot: 0, fixed: true }],
+      ["5,1", { kind: "wall", rot: 0, fixed: true }],
     ],
   }),
-  "6-5": gen({
+  "6-4": gen({
     width: 8,
     height: 9,
     cells: [
@@ -523,6 +506,22 @@ export const GENERATED: Record<string, Board> = {
       ["4,0", { kind: "target", rot: 0, color: 2, fixed: true }],
       ["0,8", { kind: "emitter", rot: 1, color: 7, fixed: true }],
       ["5,2", { kind: "wall", rot: 0, fixed: true }],
+    ],
+  }),
+  "6-5": gen({
+    width: 9,
+    height: 8,
+    cells: [
+      ["4,2", { kind: "mirror", rot: 0 }],
+      ["4,3", { kind: "mirror", rot: 1 }],
+      ["0,3", { kind: "mirror", rot: 1 }],
+      ["0,7", { kind: "target", rot: 0, color: 7, fixed: true }],
+      ["7,7", { kind: "mirror", rot: 1 }],
+      ["7,4", { kind: "mirror", rot: 0 }],
+      ["3,4", { kind: "target", rot: 0, color: 7, fixed: true }],
+      ["8,7", { kind: "emitter", rot: 3, color: 7, fixed: true }],
+      ["0,2", { kind: "emitter", rot: 1, color: 7, fixed: true }],
+      ["7,2", { kind: "wall", rot: 0, fixed: true }],
     ],
   }),
   "6-6": gen({
@@ -542,18 +541,20 @@ export const GENERATED: Record<string, Board> = {
     ],
   }),
   "7-1": gen({
-    width: 7,
-    height: 7,
+    width: 8,
+    height: 9,
     cells: [
-      ["4,3", { kind: "splitter", rot: 1, fixed: true }],
-      ["0,3", { kind: "mirror", rot: 1 }],
-      ["0,5", { kind: "mirror", rot: 0 }],
-      ["4,5", { kind: "target", rot: 0, color: 7, fixed: true }],
-      ["4,2", { kind: "mirror", rot: 0 }],
+      ["2,4", { kind: "prism", rot: 0, fixed: true }],
+      ["5,4", { kind: "mirror", rot: 1 }],
+      ["5,1", { kind: "target", rot: 0, color: 1, fixed: true }],
+      ["2,2", { kind: "mirror", rot: 0 }],
       ["0,2", { kind: "mirror", rot: 0 }],
       ["0,0", { kind: "mirror", rot: 1 }],
-      ["4,0", { kind: "target", rot: 0, color: 7, fixed: true }],
-      ["6,3", { kind: "emitter", rot: 3, color: 7, fixed: true }],
+      ["3,0", { kind: "target", rot: 0, color: 2, fixed: true }],
+      ["2,5", { kind: "mirror", rot: 0 }],
+      ["6,5", { kind: "mirror", rot: 0 }],
+      ["6,4", { kind: "target", rot: 0, color: 4, fixed: true }],
+      ["0,4", { kind: "emitter", rot: 1, color: 7, fixed: true }],
     ],
   }),
   "7-2": gen({
@@ -575,38 +576,34 @@ export const GENERATED: Record<string, Board> = {
     ],
   }),
   "7-3": gen({
-    width: 8,
-    height: 9,
+    width: 7,
+    height: 7,
     cells: [
-      ["2,4", { kind: "prism", rot: 0, fixed: true }],
-      ["5,4", { kind: "mirror", rot: 1 }],
-      ["5,1", { kind: "target", rot: 0, color: 1, fixed: true }],
-      ["2,2", { kind: "mirror", rot: 0 }],
+      ["4,3", { kind: "splitter", rot: 1, fixed: true }],
+      ["0,3", { kind: "mirror", rot: 1 }],
+      ["0,5", { kind: "mirror", rot: 0 }],
+      ["4,5", { kind: "target", rot: 0, color: 7, fixed: true }],
+      ["4,2", { kind: "mirror", rot: 0 }],
       ["0,2", { kind: "mirror", rot: 0 }],
       ["0,0", { kind: "mirror", rot: 1 }],
-      ["3,0", { kind: "target", rot: 0, color: 2, fixed: true }],
-      ["2,5", { kind: "mirror", rot: 0 }],
-      ["6,5", { kind: "mirror", rot: 0 }],
-      ["6,4", { kind: "target", rot: 0, color: 4, fixed: true }],
-      ["0,4", { kind: "emitter", rot: 1, color: 7, fixed: true }],
+      ["4,0", { kind: "target", rot: 0, color: 7, fixed: true }],
+      ["6,3", { kind: "emitter", rot: 3, color: 7, fixed: true }],
     ],
   }),
   "7-4": gen({
     width: 9,
     height: 9,
     cells: [
-      ["5,1", { kind: "mirror", rot: 1 }],
-      ["5,5", { kind: "mirror", rot: 0 }],
-      ["8,5", { kind: "mirror", rot: 1 }],
-      ["8,2", { kind: "target", rot: 0, color: 7, fixed: true }],
+      ["5,4", { kind: "splitter", rot: 1, fixed: true }],
+      ["4,4", { kind: "mirror", rot: 1 }],
+      ["4,7", { kind: "mirror", rot: 1 }],
+      ["0,7", { kind: "target", rot: 0, color: 7, fixed: true }],
+      ["5,0", { kind: "mirror", rot: 0 }],
+      ["1,0", { kind: "mirror", rot: 1 }],
       ["1,3", { kind: "mirror", rot: 0 }],
-      ["1,7", { kind: "mirror", rot: 0 }],
-      ["5,7", { kind: "mirror", rot: 1 }],
-      ["5,6", { kind: "target", rot: 0, color: 7, fixed: true }],
-      ["0,3", { kind: "emitter", rot: 1, color: 7, fixed: true }],
-      ["8,1", { kind: "emitter", rot: 3, color: 7, fixed: true }],
-      ["2,5", { kind: "wall", rot: 0, fixed: true }],
-      ["4,0", { kind: "wall", rot: 0, fixed: true }],
+      ["3,3", { kind: "target", rot: 0, color: 7, fixed: true }],
+      ["8,4", { kind: "emitter", rot: 3, color: 7, fixed: true }],
+      ["3,4", { kind: "wall", rot: 0, fixed: true }],
     ],
   }),
   "7-5": gen({
@@ -632,16 +629,18 @@ export const GENERATED: Record<string, Board> = {
     width: 9,
     height: 9,
     cells: [
-      ["5,4", { kind: "splitter", rot: 1, fixed: true }],
-      ["4,4", { kind: "mirror", rot: 1 }],
-      ["4,7", { kind: "mirror", rot: 1 }],
-      ["0,7", { kind: "target", rot: 0, color: 7, fixed: true }],
-      ["5,0", { kind: "mirror", rot: 0 }],
-      ["1,0", { kind: "mirror", rot: 1 }],
+      ["5,1", { kind: "mirror", rot: 1 }],
+      ["5,5", { kind: "mirror", rot: 0 }],
+      ["8,5", { kind: "mirror", rot: 1 }],
+      ["8,2", { kind: "target", rot: 0, color: 7, fixed: true }],
       ["1,3", { kind: "mirror", rot: 0 }],
-      ["3,3", { kind: "target", rot: 0, color: 7, fixed: true }],
-      ["8,4", { kind: "emitter", rot: 3, color: 7, fixed: true }],
-      ["3,4", { kind: "wall", rot: 0, fixed: true }],
+      ["1,7", { kind: "mirror", rot: 0 }],
+      ["5,7", { kind: "mirror", rot: 1 }],
+      ["5,6", { kind: "target", rot: 0, color: 7, fixed: true }],
+      ["0,3", { kind: "emitter", rot: 1, color: 7, fixed: true }],
+      ["8,1", { kind: "emitter", rot: 3, color: 7, fixed: true }],
+      ["2,5", { kind: "wall", rot: 0, fixed: true }],
+      ["4,0", { kind: "wall", rot: 0, fixed: true }],
     ],
   }),
   "7-7": gen({
@@ -685,48 +684,48 @@ export const GENERATED: Record<string, Board> = {
   }),
 };
 
-/** Solver-measured facts, recorded at generation time. */
+/** Solver-measured facts, recorded at generation time and re-checked in CI. */
 export const GENERATED_FACTS: Record<string, { par: number; solutions: number; score: number }> = {
-  "1-4": { par: 2, solutions: 1, score: 55 },
-  "1-5": { par: 2, solutions: 1, score: 54 },
+  "1-4": { par: 2, solutions: 1, score: 54 },
+  "1-5": { par: 2, solutions: 1, score: 55 },
   "1-6": { par: 2, solutions: 1, score: 59 },
   "1-7": { par: 3, solutions: 1, score: 70 },
   "1-8": { par: 3, solutions: 1, score: 74 },
-  "2-4": { par: 2, solutions: 1, score: 72 },
-  "2-5": { par: 2, solutions: 1, score: 57 },
-  "2-6": { par: 3, solutions: 1, score: 78 },
-  "2-7": { par: 2, solutions: 1, score: 62 },
-  "2-8": { par: 3, solutions: 1, score: 80 },
-  "2-9": { par: 3, solutions: 3, score: 77 },
-  "3-4": { par: 3, solutions: 1, score: 84 },
-  "3-5": { par: 3, solutions: 1, score: 92 },
-  "3-6": { par: 3, solutions: 3, score: 76 },
-  "3-7": { par: 4, solutions: 1, score: 101 },
-  "3-8": { par: 4, solutions: 1, score: 94 },
+  "2-4": { par: 2, solutions: 1, score: 57 },
+  "2-5": { par: 2, solutions: 1, score: 62 },
+  "2-6": { par: 2, solutions: 1, score: 72 },
+  "2-7": { par: 3, solutions: 3, score: 77 },
+  "2-8": { par: 3, solutions: 1, score: 78 },
+  "2-9": { par: 3, solutions: 1, score: 80 },
+  "3-4": { par: 3, solutions: 3, score: 76 },
+  "3-5": { par: 3, solutions: 1, score: 84 },
+  "3-6": { par: 3, solutions: 1, score: 92 },
+  "3-7": { par: 4, solutions: 1, score: 94 },
+  "3-8": { par: 4, solutions: 1, score: 101 },
   "3-9": { par: 4, solutions: 1, score: 103 },
   "4-4": { par: 3, solutions: 1, score: 79 },
   "4-5": { par: 4, solutions: 1, score: 95 },
   "4-6": { par: 4, solutions: 1, score: 95 },
-  "4-7": { par: 4, solutions: 1, score: 109 },
-  "4-8": { par: 5, solutions: 1, score: 126 },
-  "4-9": { par: 4, solutions: 1, score: 95 },
-  "5-2": { par: 4, solutions: 1, score: 99 },
-  "5-3": { par: 4, solutions: 1, score: 94 },
+  "4-7": { par: 4, solutions: 1, score: 95 },
+  "4-8": { par: 4, solutions: 1, score: 109 },
+  "4-9": { par: 5, solutions: 1, score: 126 },
+  "5-2": { par: 4, solutions: 1, score: 94 },
+  "5-3": { par: 4, solutions: 1, score: 99 },
   "5-4": { par: 5, solutions: 1, score: 115 },
-  "5-5": { par: 5, solutions: 1, score: 125 },
-  "5-6": { par: 5, solutions: 1, score: 120 },
-  "6-1": { par: 3, solutions: 1, score: 83 },
-  "6-2": { par: 3, solutions: 1, score: 77 },
-  "6-3": { par: 3, solutions: 1, score: 79 },
-  "6-4": { par: 4, solutions: 1, score: 102 },
-  "6-5": { par: 4, solutions: 1, score: 93 },
+  "5-5": { par: 5, solutions: 1, score: 120 },
+  "5-6": { par: 5, solutions: 1, score: 125 },
+  "6-1": { par: 3, solutions: 1, score: 77 },
+  "6-2": { par: 3, solutions: 1, score: 79 },
+  "6-3": { par: 3, solutions: 1, score: 83 },
+  "6-4": { par: 4, solutions: 1, score: 93 },
+  "6-5": { par: 4, solutions: 1, score: 102 },
   "6-6": { par: 5, solutions: 1, score: 125 },
-  "7-1": { par: 5, solutions: 1, score: 125 },
+  "7-1": { par: 5, solutions: 1, score: 115 },
   "7-2": { par: 5, solutions: 1, score: 120 },
-  "7-3": { par: 5, solutions: 1, score: 115 },
-  "7-4": { par: 6, solutions: 1, score: 135 },
+  "7-3": { par: 5, solutions: 1, score: 125 },
+  "7-4": { par: 5, solutions: 1, score: 125 },
   "7-5": { par: 6, solutions: 1, score: 134 },
-  "7-6": { par: 5, solutions: 1, score: 125 },
+  "7-6": { par: 6, solutions: 1, score: 135 },
   "7-7": { par: 7, solutions: 1, score: 150 },
   "7-8": { par: 8, solutions: 1, score: 166 },
 };
