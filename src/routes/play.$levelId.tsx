@@ -604,7 +604,7 @@ function LevelScreen({ levelId }: { levelId: string }) {
             deliberately not a column of cards. */}
         <motion.aside
           {...fade}
-          className="grid min-h-0 gap-x-9 gap-y-4 sm:grid-cols-2 bench:flex bench:h-full bench:min-h-0 bench:flex-col bench:gap-3.5 bench:overflow-x-hidden bench:overflow-y-auto bench:overscroll-contain bench:border-l bench:border-[var(--hairline)] bench:pb-4 bench:pl-6"
+          className="grid min-h-0 gap-x-9 gap-y-4 sm:grid-cols-2 bench:flex bench:h-full bench:min-h-0 bench:flex-col bench:gap-3.5 bench:overflow-x-hidden bench:overflow-y-auto bench:overscroll-contain bench:border-l bench:border-[var(--hairline)] bench:pb-4 bench:pl-6 bench:[&>*]:shrink-0"
         >
           <div className="grid grid-cols-2 gap-1.5">
             <button
