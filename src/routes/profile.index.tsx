@@ -170,7 +170,7 @@ function Profile() {
               </dl>
             </RailSection>
 
-            <RailSection label="Mastery" meta={`${masteryDone}/${mastery.length}`}>
+            <RailSection label="Chapter mastery" meta={`${masteryDone}/${mastery.length}`}>
               <ul className="space-y-2.5">
                 {mastery.map((m) => (
                   <li key={m.id}>
