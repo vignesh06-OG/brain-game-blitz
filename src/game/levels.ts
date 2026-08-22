@@ -1,3 +1,4 @@
+import { GENERATED, GENERATED_FACTS } from "./levels.generated";
 import { BLUE, GREEN, RED, WHITE, key, type Board, type Level, type Piece } from "./types";
 
 let uid = 0;
@@ -39,7 +40,7 @@ const board = (spec: Spec): Board => ({
  * grows through reasoning, never through board size or filler pieces. Pars are
  * the BFS optimum, verified by scripts/validate-levels.ts.
  */
-export const LEVELS: Level[] = [
+const CORE: Level[] = [
   {
     id: "1-1",
     chapter: 1,
@@ -397,6 +398,305 @@ export const LEVELS: Level[] = [
   },
 ];
 
+/**
+ * CHAPTER EXPANSION.
+ *
+ * Boards live in levels.generated.ts — each one was constructed around a
+ * guaranteed solution path and then re-verified by the exhaustive BFS solver,
+ * so `par` and `solutions` below are read straight from the solver's own
+ * measurements rather than estimated by hand.
+ */
+const ex = (
+  id: string,
+  meta: Omit<Level, "id" | "chapter" | "index" | "par" | "board" | "solutions">,
+): Level => {
+  const facts = GENERATED_FACTS[id]!;
+  const [chapter, index] = id.split("-").map(Number) as [number, number];
+  return {
+    id,
+    chapter,
+    index,
+    ...meta,
+    par: facts.par,
+    solutions: facts.solutions,
+    board: GENERATED[id]!,
+  };
+};
+
+const EXPANSION: Level[] = [
+  // ---------- CHAPTER 1 · SEE ----------
+  ex("1-4", {
+    name: "The Long Way Round",
+    concept: "Routing across a whole room",
+    tier: "Gentle",
+    hint: "Follow the beam from the emitter and stop at the first mirror that does nothing useful.",
+  }),
+  ex("1-5", {
+    name: "Two Turns",
+    concept: "Order of reflections",
+    tier: "Gentle",
+    hint: "Fix the mirror the light meets first. Everything after it moves with it.",
+  }),
+  ex("1-6", {
+    name: "The Missing Mirror",
+    concept: "Placing a surface, not just turning one",
+    tier: "Gentle",
+    teaches: "Some pieces start in the tray. Drag one onto any empty cell to place it.",
+    hint: "The beam already runs past the row the target sits on. Give it a surface where those two lines cross.",
+  }),
+  ex("1-7", {
+    name: "Three Bends",
+    concept: "A chain long enough to plan",
+    tier: "Gentle",
+    hint: "Three mirrors, three decisions. Work forwards from the emitter, not backwards from the target.",
+  }),
+  ex("1-8", {
+    name: "Bring Your Own Surface",
+    concept: "Placing and aiming in the same plan",
+    tier: "Testing",
+    hint: "Decide where the tray mirror has to sit before you touch any mirror already on the bench.",
+  }),
+
+  // ---------- CHAPTER 2 · MIX ----------
+  ex("2-4", {
+    name: "Two Doors, Two Colours",
+    concept: "One split, two coloured obligations",
+    tier: "Testing",
+    hint: "Each branch already has its filter. You only have to aim what comes out of it.",
+  }),
+  ex("2-5", {
+    name: "White Undone",
+    concept: "Reading a dispersion fan",
+    tier: "Testing",
+    hint: "Red carries straight on, green peels one way and blue the other. Name each one before you move.",
+  }),
+  ex("2-6", {
+    name: "Half and Half",
+    concept: "One beam serving two rooms",
+    tier: "Testing",
+    hint: "The splitter is already doing its job. The question is where each half lands.",
+  }),
+  ex("2-7", {
+    name: "More Than One Way",
+    concept: "A puzzle with several optimal answers",
+    tier: "Testing",
+    hint: "There is more than one correct route here. Commit to one and follow it through.",
+  }),
+  ex("2-8", {
+    name: "Twice Filtered",
+    concept: "Subtraction is one-way",
+    tier: "Testing",
+    hint: "A filter can only take away. If a channel is missing upstream, no later piece can bring it back.",
+  }),
+  ex("2-9", {
+    name: "Three at Once",
+    concept: "Three deliveries from one dispersion",
+    tier: "Testing",
+    hint: "Solve one colour completely, then the next. They do not interfere.",
+  }),
+
+  // ---------- CHAPTER 3 · REASON ----------
+  ex("3-4", {
+    name: "Choice of Routes",
+    concept: "Equally valid plans",
+    tier: "Demanding",
+    hint: "Several placements work. Pick the one you can finish, not the one you saw first.",
+  }),
+  ex("3-5", {
+    name: "Two Sources",
+    concept: "Independent beams, shared board",
+    tier: "Demanding",
+    hint: "Two emitters, two obligations. Treat them as separate problems until they collide.",
+  }),
+  ex("3-6", {
+    name: "Both Halves Matter",
+    concept: "A split that cannot be half-solved",
+    tier: "Demanding",
+    hint: "Aiming the near target is easy. Check what that same move does to the far one.",
+  }),
+  ex("3-7",  {
+    name: "Colour Obligations",
+    concept: "Two channels, two destinations",
+    tier: "Demanding",
+    hint: "Work out which target can only ever be fed by one branch, and satisfy that one first.",
+  }),
+  ex("3-8", {
+    name: "The Second Target",
+    concept: "Path dependency between branches",
+    tier: "Demanding",
+    hint: "Every move you make on the shared stretch changes both branches at once.",
+  }),
+  ex("3-9", {
+    name: "Independent Chains",
+    concept: "Two long routes, no interference",
+    tier: "Demanding",
+    hint: "Neither beam can help the other. Four moves, split two and two.",
+  }),
+
+  // ---------- CHAPTER 4 · CONSTRAIN ----------
+  ex("4-4", {
+    name: "One Piece in Hand",
+    concept: "A single placement decides everything",
+    tier: "Demanding",
+    hint: "There is exactly one cell where the tray piece is useful. Find it before rotating anything.",
+  }),
+  ex("4-5", {
+    name: "Nothing to Spare",
+    concept: "Par equals the number of decisions",
+    tier: "Demanding",
+    hint: "Every move in par is load-bearing. If a move changes nothing visible, it is the wrong move.",
+  }),
+  ex("4-6", {
+    name: "Exact Change",
+    concept: "Optimisation under a fixed budget",
+    tier: "Demanding",
+    hint: "Count the mirrors that are currently wrong. That count is your answer.",
+  }),
+  ex("4-7", {
+    name: "No Wasted Move",
+    concept: "Placement before rotation",
+    tier: "Demanding",
+    hint: "Place first, aim second. Aiming a mirror before you know the route wastes a move.",
+  }),
+  ex("4-8", {
+    name: "Split Under Constraint",
+    concept: "Two obligations, four moves",
+    tier: "Master",
+    hint: "Solve the branch with the fewest options first — it constrains the other one.",
+  }),
+  ex("4-9", {
+    name: "Five Exactly",
+    concept: "Minimum-move reasoning",
+    tier: "Master",
+    hint: "Five moves is the proven minimum. If your plan needs six, the plan is wrong, not the board.",
+  }),
+
+  // ---------- CHAPTER 5 · BREAK ----------
+  ex("5-2", {
+    name: "What the Filter Costs",
+    concept: "The cheapest route is not always available",
+    tier: "Master",
+    hint: "The obvious line reaches the target with the wrong channel. Ask what that target can actually accept.",
+  }),
+  ex("5-3", {
+    name: "The Colour You Cannot Make",
+    concept: "Dispersion is destructive",
+    tier: "Master",
+    hint: "Once white is taken apart, no single branch is white again. Plan around what each branch really carries.",
+  }),
+  ex("5-4", {
+    name: "Backwards Through the Spectrum",
+    concept: "Reasoning from the target outwards",
+    tier: "Master",
+    hint: "Start at each target, decide which prism output could reach it, and only then aim mirrors.",
+  }),
+  ex("5-5", {
+    name: "Two Beams, Two Debts",
+    concept: "Sources that cannot cover for each other",
+    tier: "Master",
+    hint: "Neither emitter can reach both targets. Assign them before you move anything.",
+  }),
+  ex("5-6", {
+    name: "The Useful Detour",
+    concept: "A longer path that costs fewer moves",
+    tier: "Master",
+    hint: "The short route needs more re-aiming than the long one. Count moves, not distance.",
+  }),
+
+  // ---------- CHAPTER 6 · APPLY ----------
+  ex("6-1", {
+    name: "Stage Wash",
+    concept: "Colour-mixing a lighting rig",
+    tier: "Demanding",
+    hint: "Theatre lanterns mix light, not paint. Each lamp needs the channel its gel will pass.",
+  }),
+  ex("6-2", {
+    name: "Spectrometer Bench",
+    concept: "Sorting a source into its lines",
+    tier: "Demanding",
+    hint: "A spectrometer separates first and measures second. Get the fan clear before you route it.",
+  }),
+  ex("6-3", {
+    name: "Twin Beacons",
+    concept: "Two installations, one bench",
+    tier: "Demanding",
+    hint: "Two lamps, two sightlines. Neither can borrow the other's light.",
+  }),
+  ex("6-4", {
+    name: "Fibre Splice",
+    concept: "Keeping channels separate down one run",
+    tier: "Demanding",
+    hint: "A splice must deliver each channel unmixed. Check what arrives, not just that something arrives.",
+  }),
+  ex("6-5", {
+    name: "Survey Line",
+    concept: "Sightlines around obstacles",
+    tier: "Master",
+    hint: "Surveyors route around what they cannot move. The walls decide the corridor for you.",
+  }),
+  ex("6-6", {
+    name: "Interferometer Arm",
+    concept: "One source, two arms of equal duty",
+    tier: "Master",
+    hint: "Both arms of the instrument have to be satisfied by the same divided beam.",
+  }),
+
+  // ---------- CHAPTER 7 · MASTER ----------
+  ex("7-1", {
+    name: "Full Dispersion",
+    concept: "Three channels, five moves",
+    tier: "Master",
+    hint: "Red is usually already free. Spend your moves on the two that are not.",
+  }),
+  ex("7-2", {
+    name: "Parallel Obligations",
+    concept: "Two sources at full length",
+    tier: "Master",
+    hint: "Plan both routes on paper before the first tap. Half a plan costs moves.",
+  }),
+  ex("7-3", {
+    name: "Long Division",
+    concept: "A split with two long tails",
+    tier: "Master",
+    hint: "The shared stretch is the expensive part. Settle it first, then finish each tail.",
+  }),
+  ex("7-4", {
+    name: "The Quiet Corner",
+    concept: "The far target is the constraint",
+    tier: "Master",
+    hint: "One target is far harder to reach than the other. Build the whole route around it.",
+  }),
+  ex("7-5", {
+    name: "Six Exactly",
+    concept: "Dispersion at full depth",
+    tier: "Master",
+    hint: "Six moves, three colours. Assign each move to a colour before you start.",
+  }),
+  ex("7-6", {
+    name: "Both Ends of the Bench",
+    concept: "Two sources, six decisions",
+    tier: "Master",
+    hint: "Work from whichever emitter has fewer legal routes — it will pin down the rest.",
+  }),
+  ex("7-7", {
+    name: "Seven Bends",
+    concept: "A route too long to hold in your head",
+    tier: "Master",
+    hint: "Trace the whole path once, out loud, before touching anything. Seven moves punishes guessing.",
+  }),
+  ex("7-8", {
+    name: "The Long Spectrum",
+    concept: "Every idea in the campaign, at once",
+    tier: "Master",
+    hint: "Dispersion, three chains, eight moves. This is the campaign asking for all of it together.",
+  }),
+];
+
+/** The shipping campaign: hand-built anchors plus the verified expansion. */
+export const LEVELS: Level[] = [...CORE, ...EXPANSION].sort(
+  (a, b) => a.chapter - b.chapter || a.index - b.index,
+);
+
 export const getLevel = (id: string) => LEVELS.find((l) => l.id === id);
 export const nextLevel = (id: string) => {
   const i = LEVELS.findIndex((l) => l.id === id);
@@ -410,37 +710,51 @@ export const nextLevel = (id: string) => {
 export const CHAPTERS = [
   {
     n: 1,
-    name: "Reflection",
-    subtitle: "Discover light",
+    name: "See",
+    subtitle: "Reflection & routing",
     blurb:
-      "Light travels in straight lines until a surface turns it. Three experiments: bend one beam, chain two mirrors, and learn to read a path before you disturb it.",
+      "Light travels in straight lines until a surface turns it. Bend one beam, chain mirrors together, learn to read a path before you disturb it — and place your first surface by hand.",
   },
   {
     n: 2,
-    name: "Refraction & Absorption",
-    subtitle: "Understand light",
+    name: "Mix",
+    subtitle: "Colour, splitting & absorption",
     blurb:
-      "White light is a bundle of wavelengths. Splitters duplicate a beam, filters absorb what they are not, and prisms separate every component at once.",
+      "White light is a bundle of channels. Splitters duplicate a beam, filters absorb everything they are not, and prisms separate red, green and blue in a single stroke.",
   },
   {
     n: 3,
-    name: "Superposition",
-    subtitle: "Combine light",
+    name: "Reason",
+    subtitle: "Obligations & dependencies",
     blurb:
-      "Where beams meet, their channels add. From here a target is rarely reachable by a single beam — you have to design the whole network before the first move.",
+      "Several targets, several sources, one bench. Every move now touches more than one obligation, so the whole network has to be designed before the first tap.",
   },
   {
     n: 4,
-    name: "Optical Systems",
-    subtitle: "Master light",
+    name: "Constrain",
+    subtitle: "Optimisation",
     blurb:
-      "Long optical paths, several sources and no spare moves. The final lock has to be solved backwards, from the colour it demands to the light that can supply it.",
+      "Par is the solver's proven minimum, and these boards give you nothing spare. Placement before rotation, and every move has to earn its place.",
   },
   {
     n: 5,
-    name: "The Master Trial",
-    subtitle: "Question light",
+    name: "Break",
+    subtitle: "Question what you learned",
     blurb:
-      "One puzzle. Everything the campaign taught you about taking light apart, asked backwards.",
+      "Puzzles built to defeat the habit the earlier chapters gave you — starting with the Master Trial, where a splitter has to be read backwards.",
+  },
+  {
+    n: 6,
+    name: "Apply",
+    subtitle: "Optics in the world",
+    blurb:
+      "The same reasoning on real benches: a lighting rig, a spectrometer, a fibre splice, a survey line. Field Missions live here too.",
+  },
+  {
+    n: 7,
+    name: "Master",
+    subtitle: "Everything, together",
+    blurb:
+      "The deepest boards in Prism — up to eight proven-minimum moves, three colour channels and two sources, with no mechanic left unused.",
   },
 ];

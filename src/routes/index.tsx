@@ -121,7 +121,7 @@ function Landing() {
             className="mt-6 max-w-md text-[0.9375rem] leading-relaxed text-muted-foreground"
           >
             Route beams through mirrors, splitters, filters and prisms until every
-            target burns the exact colour it asks for. Thirteen hand-built puzzles
+            target burns the exact colour it asks for. Fifty-five solver-verified puzzles
             on a real optical simulation — no lives, no timers, no luck.
           </motion.p>
 

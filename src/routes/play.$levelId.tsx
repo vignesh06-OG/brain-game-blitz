@@ -896,6 +896,7 @@ function LevelScreen({ levelId }: { levelId: string }) {
         title={level.name}
         moves={game.moves}
         par={level.par}
+        solutions={level.solutions}
         stars={stars}
         frames={game.timeline}
         colorblind={prefs.colorblind}

@@ -74,6 +74,8 @@ export interface Level {
     advanced: string;
   };
   par: number;
+  /** Distinct optimal solutions the BFS solver found. 1 = a single best route. */
+  solutions?: number;
   board: Board;
 }
 
