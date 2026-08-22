@@ -83,7 +83,7 @@ function Profile() {
 
   const laws = readLaws(discovered);
   const known = laws.filter((l) => l.known).length;
-  const solved = Object.keys(progress).length;
+  const solved = LEVELS.filter((l) => progress[l.id] !== undefined).length;
   const atPar = LEVELS.filter((l) => progress[l.id] !== undefined && progress[l.id]! <= l.par).length;
   const broken = streakBroken(streak);
   const shownStreak = broken ? 0 : streak.current;
