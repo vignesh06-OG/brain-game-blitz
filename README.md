@@ -18,6 +18,18 @@ simulation, with no lives, no timers and no luck.
 
 ---
 
+## 📚 Comprehensive Technical Documentation
+
+Our full 16-page Technical Documentation & Case Study covers the complete architectural breakdown,
+AI validation metrics (PhotonMind model evaluation and the exhaustive BFS solver), and the game
+design philosophy behind every puzzle.
+
+### 📄 [Read the full Technical Documentation & Case Study (Google Drive)](https://drive.google.com/file/d/1dbFzryJsGo_H2WVXo3ztDApuU6DtQXlz/view?usp=sharing)
+
+---
+
+
+
 
 <img src="docs/assets/gameplay.png" alt="A Prism puzzle: an emitter, a mirror and an unlit target on the optical bench" width="100%">
 
