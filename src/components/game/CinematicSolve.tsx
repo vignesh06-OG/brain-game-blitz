@@ -11,6 +11,8 @@ interface Props {
   title: string;
   moves: number;
   par: number;
+  /** Distinct optimal solutions the solver found for this board. */
+  solutions?: number | undefined;
   stars: number;
   frames: Board[];
   colorblind: boolean;
@@ -31,6 +33,7 @@ export function CinematicSolve({
   title,
   moves,
   par,
+  solutions,
   stars,
   frames,
   colorblind,
@@ -194,6 +197,17 @@ export function CinematicSolve({
                     </div>
                   ))}
                 </dl>
+
+                {/* Several optimal routes exist — that is a property of the
+                    board, measured by the solver, not a consolation prize. */}
+                {solutions && solutions > 1 ? (
+                  <p className="mt-3 text-[0.8125rem] text-muted-foreground">
+                    <span className="font-semibold text-foreground">
+                      {solutions} optimal solutions
+                    </span>{" "}
+                    exist for this board. Yours is one of them.
+                  </p>
+                ) : null}
 
                 {/* One concept, tied to the move the player just made. */}
                 {lesson && (

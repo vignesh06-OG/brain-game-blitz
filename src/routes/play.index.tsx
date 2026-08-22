@@ -19,12 +19,12 @@ export const Route = createFileRoute("/play/")({
       {
         name: "description",
         content:
-          "Thirteen hand-built light puzzles across four chapters: Reflection, Refraction, Superposition and Optical Systems.",
+          "Fifty-five solver-verified light puzzles across seven chapters: See, Mix, Reason, Constrain, Break, Apply and Master.",
       },
       { property: "og:title", content: "Choose a Puzzle — Prism" },
       {
         property: "og:description",
-        content: "Thirteen hand-built light puzzles across four chapters.",
+        content: "Fifty-five solver-verified light puzzles across seven chapters.",
       },
     ],
   }),
