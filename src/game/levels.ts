@@ -710,37 +710,51 @@ export const nextLevel = (id: string) => {
 export const CHAPTERS = [
   {
     n: 1,
-    name: "Reflection",
-    subtitle: "Discover light",
+    name: "See",
+    subtitle: "Reflection & routing",
     blurb:
-      "Light travels in straight lines until a surface turns it. Three experiments: bend one beam, chain two mirrors, and learn to read a path before you disturb it.",
+      "Light travels in straight lines until a surface turns it. Bend one beam, chain mirrors together, learn to read a path before you disturb it — and place your first surface by hand.",
   },
   {
     n: 2,
-    name: "Refraction & Absorption",
-    subtitle: "Understand light",
+    name: "Mix",
+    subtitle: "Colour, splitting & absorption",
     blurb:
-      "White light is a bundle of wavelengths. Splitters duplicate a beam, filters absorb what they are not, and prisms separate every component at once.",
+      "White light is a bundle of channels. Splitters duplicate a beam, filters absorb everything they are not, and prisms separate red, green and blue in a single stroke.",
   },
   {
     n: 3,
-    name: "Superposition",
-    subtitle: "Combine light",
+    name: "Reason",
+    subtitle: "Obligations & dependencies",
     blurb:
-      "Where beams meet, their channels add. From here a target is rarely reachable by a single beam — you have to design the whole network before the first move.",
+      "Several targets, several sources, one bench. Every move now touches more than one obligation, so the whole network has to be designed before the first tap.",
   },
   {
     n: 4,
-    name: "Optical Systems",
-    subtitle: "Master light",
+    name: "Constrain",
+    subtitle: "Optimisation",
     blurb:
-      "Long optical paths, several sources and no spare moves. The final lock has to be solved backwards, from the colour it demands to the light that can supply it.",
+      "Par is the solver's proven minimum, and these boards give you nothing spare. Placement before rotation, and every move has to earn its place.",
   },
   {
     n: 5,
-    name: "The Master Trial",
-    subtitle: "Question light",
+    name: "Break",
+    subtitle: "Question what you learned",
     blurb:
-      "One puzzle. Everything the campaign taught you about taking light apart, asked backwards.",
+      "Puzzles built to defeat the habit the earlier chapters gave you — starting with the Master Trial, where a splitter has to be read backwards.",
+  },
+  {
+    n: 6,
+    name: "Apply",
+    subtitle: "Optics in the world",
+    blurb:
+      "The same reasoning on real benches: a lighting rig, a spectrometer, a fibre splice, a survey line. Field Missions live here too.",
+  },
+  {
+    n: 7,
+    name: "Master",
+    subtitle: "Everything, together",
+    blurb:
+      "The deepest boards in Prism — up to eight proven-minimum moves, three colour channels and two sources, with no mechanic left unused.",
   },
 ];
